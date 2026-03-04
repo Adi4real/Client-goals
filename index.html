@@ -213,36 +213,36 @@
         </div>
     </div>
 
-    <script type="module">
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // 1. Firebase Configuration (Ensure YOUR_PROJECT_ID etc. are filled)
     const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_PROJECT.firebaseapp.com",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_PROJECT.appspot.com",
-        messagingSenderId: "YOUR_ID",
-        appId: "YOUR_APP_ID"
+        apiKey: "AIzaSyAavaP0GEwkj9Rr6iFdmkpM1F1LgguoYck",
+        authDomain: "goal-tracker-238da.firebaseapp.com",
+        projectId: "goal-tracker-238da",
+        storageBucket: "goal-tracker-238da.firebasestorage.app",
+        messagingSenderId: "546758078084",
+        appId: "1:546758078084:web:330f3dcc861d8427165cd1"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const clientsCol = collection(db, "clients");
 
-    deleteTargetId = null;
+    let deleteTargetId = null;
+    let allClients = []; // Store data locally for searching/editing
 
-    // 2. Real-time Listener (Syncs everyone's screen)
+    // 2. REAL-TIME DATABASE SYNC
     onSnapshot(clientsCol, (snapshot) => {
-        const clients = snapshot.docs.map(doc => ({ 
-            id: doc.id, // We use the Firebase Document ID
+        allClients = snapshot.docs.map(doc => ({ 
+            firebaseId: doc.id, 
             ...doc.data() 
         }));
-        renderTable(clients); 
+        renderTable(allClients); 
     });
 
-    // 3. Render Table Function
+    // 3. RENDER TABLE
     function renderTable(data) {
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = data.map((c, index) => `
@@ -264,15 +264,14 @@
                 <td><span class="status-pill ${c.status.replace(' ', '-')}">${c.status}</span></td>
                 <td>
                     <div class="action-icons">
-                        <i data-lucide="edit-3" class="edit-trigger" data-id="${c.id}"></i>
-                        <i data-lucide="trash-2" class="delete-trigger" data-id="${c.id}"></i>
+                        <i data-lucide="edit-3" onclick="prepareEdit('${c.firebaseId}')"></i>
+                        <i data-lucide="trash-2" onclick="prepareDelete('${c.firebaseId}', '${c.name}', '${c.goal}')"></i>
                     </div>
                 </td>
             </tr>
         `).join('');
         lucide.createIcons();
-        updateStats(data);
-        setupActionListeners(data); // Re-attach click events to new icons
+        updateStats(allClients);
     }
 
     function updateStats(data) {
@@ -280,30 +279,59 @@
         document.getElementById('statLine').innerHTML = `${data.length} clients <span class="pending">• ${pending} pending review</span>`;
     }
 
-    // 4. Modal Logic
-    window.openModal = (mode, id = null) => {
+    // 4. ATTACH FUNCTIONS TO WINDOW
+    window.openModal = (mode) => {
         const modal = document.getElementById('formModal');
-        const title = document.getElementById('modalTitle');
-        const btn = document.getElementById('submitBtn');
         document.getElementById('clientForm').reset();
-        
-        if(mode === 'edit' && id) {
-            // Logic to find data from current table to pre-fill
-            title.innerText = "Edit Client Goal";
-            btn.innerText = "Update";
-            // Note: In module scripts, we'll handle pre-filling via the setupActionListeners
-        } else {
-            title.innerText = "Add New Client Goal";
-            btn.innerText = "Add Client";
-            document.getElementById('editId').value = "";
-            document.getElementById('f_date').valueAsDate = new Date();
-        }
+        document.getElementById('editId').value = "";
+        document.getElementById('modalTitle').innerText = "Add New Client Goal";
+        document.getElementById('submitBtn').innerText = "Add Client";
+        document.getElementById('f_date').valueAsDate = new Date();
         modal.style.display = 'flex';
     };
 
     window.closeModal = (id) => { document.getElementById(id).style.display = 'none'; };
 
-    // 5. Submit to Firebase (Add or Update)
+    // FIX: This now correctly fills the form for editing
+    window.prepareEdit = (id) => {
+        const c = allClients.find(x => x.firebaseId === id);
+        if (!c) return;
+        
+        document.getElementById('editId').value = id;
+        document.getElementById('f_name').value = c.name;
+        document.getElementById('f_date').value = c.date;
+        document.getElementById('f_goal').value = c.goal;
+        document.getElementById('f_assigned').value = c.assigned;
+        document.getElementById('f_cost').value = c.cost;
+        document.getElementById('f_inf').value = c.inf;
+        document.getElementById('f_growth').value = c.growth;
+        document.getElementById('f_risk').value = c.risk;
+        document.getElementById('f_total_years').value = c.years;
+        document.getElementById('f_asset').value = c.asset;
+        document.getElementById('f_status').value = c.status;
+        
+        document.getElementById('modalTitle').innerText = "Edit Client Goal";
+        document.getElementById('submitBtn').innerText = "Update";
+        document.getElementById('formModal').style.display = 'flex';
+    };
+
+    window.prepareDelete = (id, name, goal) => {
+        deleteTargetId = id;
+        document.getElementById('deleteText').innerText = `Remove ${name}'s "${goal}" goal? This action cannot be undone.`;
+        document.getElementById('deleteModal').style.display = 'flex';
+    };
+
+    // 5. SEARCH LOGIC
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const filtered = allClients.filter(c => 
+            c.name.toLowerCase().includes(term) || 
+            c.goal.toLowerCase().includes(term)
+        );
+        renderTable(filtered);
+    });
+
+    // 6. SAVE TO FIREBASE
     document.getElementById('clientForm').onsubmit = async (e) => {
         e.preventDefault();
         const id = document.getElementById('editId').value;
@@ -316,190 +344,32 @@
             date: dateVal,
             goal: document.getElementById('f_goal').value,
             assigned: document.getElementById('f_assigned').value,
-            cost: parseInt(document.getElementById('f_cost').value),
+            cost: Number(document.getElementById('f_cost').value),
             inf: document.getElementById('f_inf').value,
             growth: document.getElementById('f_growth').value,
             sip: document.getElementById('f_sip').value + " (SIP)",
             risk: document.getElementById('f_risk').value,
-            maturity: (parseInt(document.getElementById('f_cost').value) * 1.8).toLocaleString('en-IN'),
+            maturity: (Number(document.getElementById('f_cost').value) * 1.8).toLocaleString('en-IN'),
             years: years,
             asset: document.getElementById('f_asset').value,
             matYear: matYear,
             status: document.getElementById('f_status').value
         };
 
-        try {
-            if(id) {
-                await updateDoc(doc(db, "clients", id), entry); //
-            } else {
-                await addDoc(clientsCol, entry); //
-            }
-            closeModal('formModal');
-        } catch (error) {
-            console.error("Error saving to Firebase:", error);
+        if (id) {
+            await updateDoc(doc(db, "clients", id), entry); //
+        } else {
+            await addDoc(clientsCol, entry); //
         }
+        closeModal('formModal');
     };
 
-    // 6. Delete Logic
     document.getElementById('confirmDelete').onclick = async () => {
-        if(deleteTargetId) {
+        if (deleteTargetId) {
             await deleteDoc(doc(db, "clients", deleteTargetId)); //
             closeModal('deleteModal');
         }
     };
-
-    // Helper to handle dynamic icon clicks
-    function setupActionListeners(data) {
-        document.querySelectorAll('.edit-trigger').forEach(el => {
-            el.onclick = () => {
-                const id = el.getAttribute('data-id');
-                const c = data.find(x => x.id === id);
-                document.getElementById('editId').value = id;
-                document.getElementById('f_name').value = c.name;
-                document.getElementById('f_date').value = c.date;
-                document.getElementById('f_cost').value = c.cost;
-                document.getElementById('f_total_years').value = c.years;
-                document.getElementById('calc_val').innerText = '₹' + c.maturity;
-                document.getElementById('calc_year').innerText = c.matYear;
-                openModal('edit', id);
-            };
-        });
-
-        document.querySelectorAll('.delete-trigger').forEach(el => {
-            el.onclick = () => {
-                const id = el.getAttribute('data-id');
-                const c = data.find(x => x.id === id);
-                deleteTargetId = id;
-                document.getElementById('deleteText').innerText = `Remove ${c.name}'s "${c.goal}" goal? This action cannot be undone.`;
-                document.getElementById('deleteModal').style.display = 'flex';
-            };
-        });
-    }
 </script>
-
-    <script>
-        let clientData = [
-            { id: 1, date: "2024-01-15", name: "Arjun Mehta", goal: "UG Education", assigned: "Rahul Sharma", cost: 1500000, inf: 6, growth: 12, sip: "10,000 (SIP)", risk: "Moderate", maturity: "26,87,833", years: 10, asset: "Hybrid", matYear: 2034, status: "Active", alert: false },
-            { id: 2, date: "2023-06-20", name: "Kavitha Nair", goal: "Marriage", assigned: "Priya Patel", cost: 2500000, inf: 5, growth: 10, sip: "15,000 (SIP)", risk: "Aggressive", maturity: "40,72,241", years: 8, asset: "Equity", matYear: 2031, status: "Active", alert: false },
-            { id: 4, date: "2021-11-05", name: "Deepa Kulkarni", goal: "Home Purchase", assigned: "Sneha Reddy", cost: 5000000, inf: 7, growth: 14, sip: "20,00,000 (LS)", risk: "Aggressive", maturity: "92,54,310", years: 7, asset: "Equity", matYear: 2028, status: "Under Review", alert: true }
-        ];
-
-        let deleteTargetId = null;
-
-        function renderTable(data = clientData) {
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = data.map((c, index) => `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td>${c.date}</td>
-                    <td>${c.name} ${c.alert ? '<i data-lucide="alert-triangle" class="warning-icon"></i>' : ''}</td>
-                    <td>${c.goal}</td>
-                    <td>${c.assigned}</td>
-                    <td>₹${c.cost.toLocaleString('en-IN')}</td>
-                    <td>${c.inf}%</td>
-                    <td>${c.growth}%</td>
-                    <td>₹${c.sip}</td>
-                    <td class="risk-${c.risk}">${c.risk}</td>
-                    <td><strong>₹${c.maturity}</strong></td>
-                    <td>${c.years}</td>
-                    <td>${c.asset}</td>
-                    <td>${c.matYear}</td>
-                    <td><span class="status-pill ${c.status.replace(' ', '-')}">${c.status}</span></td>
-                    <td>
-                        <div class="action-icons">
-                            <i data-lucide="edit-3" onclick="openModal('edit', ${c.id})"></i>
-                            <i data-lucide="trash-2" onclick="openDeleteModal(${c.id})"></i>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-            lucide.createIcons();
-            updateStats();
-        }
-
-        function updateStats() {
-            const pending = clientData.filter(c => c.status === "Under Review").length;
-            document.getElementById('statLine').innerHTML = `${clientData.length} clients <span class="pending">• ${pending} pending review</span>`;
-        }
-
-        function openModal(mode, id = null) {
-            const modal = document.getElementById('formModal');
-            const title = document.getElementById('modalTitle');
-            const btn = document.getElementById('submitBtn');
-            document.getElementById('clientForm').reset();
-            
-            if(mode === 'edit') {
-                const c = clientData.find(x => x.id === id);
-                title.innerText = "Edit Client Goal";
-                btn.innerText = "Update";
-                document.getElementById('editId').value = c.id;
-                document.getElementById('f_name').value = c.name;
-                document.getElementById('f_date').value = c.date;
-                document.getElementById('f_cost').value = c.cost;
-                document.getElementById('f_total_years').value = c.years;
-                document.getElementById('calc_val').innerText = '₹' + c.maturity;
-                document.getElementById('calc_year').innerText = c.matYear;
-            } else {
-                title.innerText = "Add New Client Goal";
-                btn.innerText = "Add Client";
-                document.getElementById('editId').value = "";
-                document.getElementById('f_date').valueAsDate = new Date();
-            }
-            modal.style.display = 'flex';
-        }
-
-        function openDeleteModal(id) {
-            const c = clientData.find(x => x.id === id);
-            deleteTargetId = id;
-            document.getElementById('deleteText').innerText = `Remove ${c.name}'s "${c.goal}" goal? This action cannot be undone.`;
-            document.getElementById('deleteModal').style.display = 'flex';
-        }
-
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-
-        document.getElementById('clientForm').onsubmit = (e) => {
-            e.preventDefault();
-            const id = document.getElementById('editId').value;
-            const years = parseInt(document.getElementById('f_total_years').value);
-            const dateVal = document.getElementById('f_date').value;
-            const matYear = new Date(dateVal).getFullYear() + years;
-
-            const entry = {
-                id: id ? parseInt(id) : Date.now(),
-                name: document.getElementById('f_name').value,
-                date: dateVal,
-                goal: document.getElementById('f_goal').value,
-                assigned: document.getElementById('f_assigned').value,
-                cost: parseInt(document.getElementById('f_cost').value),
-                inf: document.getElementById('f_inf').value,
-                growth: document.getElementById('f_growth').value,
-                sip: document.getElementById('f_sip').value + " (SIP)",
-                risk: document.getElementById('f_risk').value,
-                maturity: (parseInt(document.getElementById('f_cost').value) * 1.8).toLocaleString('en-IN'), // Simplified calc
-                years: years,
-                asset: document.getElementById('f_asset').value,
-                matYear: matYear,
-                status: document.getElementById('f_status').value,
-                alert: document.getElementById('f_status').value === "Under Review"
-            };
-
-            if(id) {
-                const index = clientData.findIndex(x => x.id === parseInt(id));
-                clientData[index] = entry;
-            } else {
-                clientData.push(entry);
-            }
-            renderTable();
-            closeModal('formModal');
-        };
-
-        document.getElementById('confirmDelete').onclick = () => {
-            clientData = clientData.filter(x => x.id !== deleteTargetId);
-            renderTable();
-            closeModal('deleteModal');
-        };
-
-        renderTable();
-    </script>
 </body>
 </html>
