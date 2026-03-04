@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goal Planner Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --primary-blue: #2563eb;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --risk-aggressive: #dc2626;
+            --risk-moderate: #d97706;
+            --risk-conservative: #16a34a;
+            --status-active-bg: #dcfce7;
+            --status-active-text: #16a34a;
+            --status-review-bg: #ffedd5;
+            --status-review-text: #d97706;
+        }
+
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); margin: 0; padding: 20px; color: var(--text-main); }
+        .dashboard-container { max-width: 1400px; margin: 0 auto; background: var(--card-bg); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 24px; }
+        
+        /* Header */
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .stats { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+        .pending { color: #f59e0b; font-weight: 500; }
+        .actions { display: flex; gap: 12px; }
+        .search-container { position: relative; display: flex; align-items: center; }
+        .search-container i { position: absolute; left: 10px; width: 18px; color: var(--text-muted); }
+        .search-container input { padding: 10px 10px 10px 35px; border: 1px solid var(--border-color); border-radius: 8px; width: 250px; background: #fff; }
+        .btn-add { background: #003366; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; }
+
+        /* Table */
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th { padding: 12px; color: var(--text-muted); text-align: left; border-bottom: 1px solid var(--border-color); font-weight: 500; text-transform: uppercase; }
+        td { padding: 12px; border-bottom: 1px solid var(--border-color); }
+        .risk-Aggressive { color: var(--risk-aggressive); font-weight: 600; }
+        .risk-Moderate { color: var(--risk-moderate); font-weight: 600; }
+        .risk-Conservative { color: var(--risk-conservative); font-weight: 600; }
+        .status-pill { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+        .Active { background: var(--status-active-bg); color: var(--status-active-text); }
+        .Under-Review { background: var(--status-review-bg); color: var(--status-review-text); }
+        .action-icons { display: flex; gap: 8px; }
+        .action-icons i { width: 16px; cursor: pointer; color: var(--text-muted); }
+        .warning-icon { color: #f59e0b; width: 12px; margin-left: 4px; }
+
+        /* Modal Base */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-card { background: white; border-radius: 12px; width: 600px; padding: 24px; position: relative; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h2 { font-size: 18px; margin: 0; }
+        
+        /* Form Layout */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+        .form-group input, .form-group select { padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: #f8fafc; font-size: 13px; outline: none; }
+        .form-group input:focus { border-color: var(--primary-blue); }
+
+        /* Calculation Footer in Modal */
+        .modal-calc-footer { background: #f8fafc; padding: 12px 16px; border-radius: 8px; margin-top: 20px; display: flex; gap: 24px; font-size: 14px; }
+        .modal-calc-footer span strong { color: #1e293b; }
+
+        .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+        .btn-cancel { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border-color); background: #fff; cursor: pointer; }
+        .btn-submit { padding: 10px 20px; border-radius: 8px; border: none; background: var(--primary-blue); color: #fff; cursor: pointer; }
+
+        /* Delete Modal specific */
+        .delete-modal { width: 400px; text-align: center; }
+        .delete-modal p { color: var(--text-muted); font-size: 14px; }
+        .btn-delete { background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="title-group">
+                <h1 style="font-size: 20px; margin: 0;">Client Goals Dashboard</h1>
+                <p class="stats" id="statLine">6 clients <span class="pending">• 2 pending review</span></p>
+            </div>
+            <div class="actions">
+                <div class="search-container">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="searchInput" placeholder="Search clients...">
+                </div>
+                <button class="btn-add" onclick="openModal('add')">
+                    <i data-lucide="plus"></i> Add Client
+                </button>
+            </div>
+        </header>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>S.NO</th><th>DATE</th><th>CLIENT NAME</th><th>GOAL</th><th>ASSIGNED TO</th>
+                        <th>PRESENT COST</th><th>INF. %</th><th>GROWTH %</th><th>SIP/LUMP</th>
+                        <th>RISK</th><th>MATURITY VAL.</th><th>YEARS</th><th>ASSET</th><th>MAT. YEAR</th><th>STATUS</th><th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="formModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add New Client Goal</h2>
+                <button onclick="closeModal('formModal')" style="background:none; border:none; cursor:pointer; font-size:20px;">&times;</button>
+            </div>
+            <form id="clientForm">
+                <input type="hidden" id="editId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Client Name</label>
+                        <input type="text" id="f_name" placeholder="Full Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="f_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Goal</label>
+                        <select id="f_goal">
+                            <option>UG Education</option>
+                            <option>Marriage</option>
+                            <option>Retirement</option>
+                            <option>Home Purchase</option>
+                            <option>Wealth Creation</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Assigned To</label>
+                        <select id="f_assigned">
+                            <option>Rahul Sharma</option>
+                            <option>Priya Patel</option>
+                            <option>Amit Kumar</option>
+                            <option>Sneha Reddy</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Present Cost (₹)</label>
+                        <input type="number" id="f_cost" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Inflation (%)</label>
+                        <input type="number" id="f_inf" value="6">
+                    </div>
+                    <div class="form-group">
+                        <label>Growth Rate (%)</label>
+                        <input type="number" id="f_growth" value="12">
+                    </div>
+                    <div class="form-group">
+                        <label>Investment Type</label>
+                        <select id="f_type"><option>SIP</option><option>Lumpsum</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label>SIP Amount (₹/month)</label>
+                        <input type="number" id="f_sip" value="10000">
+                    </div>
+                    <div class="form-group">
+                        <label>Years Invested</label>
+                        <input type="number" id="f_invested" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Risk Appetite</label>
+                        <select id="f_risk"><option>Moderate</option><option>Aggressive</option><option>Conservative</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label>No. of Years (Total)</label>
+                        <input type="number" id="f_total_years" value="10">
+                    </div>
+                    <div class="form-group">
+                        <label>Asset Allocation</label>
+                        <select id="f_asset"><option>Hybrid</option><option>Equity</option><option>Debt</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="f_status"><option>Active</option><option>Under Review</option></select>
+                    </div>
+                </div>
+
+                <div class="modal-calc-footer">
+                    <span>Maturity Value: <strong id="calc_val">₹0</strong></span>
+                    <span>Maturity Year: <strong id="calc_year">2034</strong></span>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('formModal')">Cancel</button>
+                    <button type="submit" class="btn-submit" id="submitBtn">Add Client</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal-card delete-modal">
+            <h2 style="margin-bottom: 8px;">Delete Client Goal</h2>
+            <p id="deleteText">Remove Client's Goal? This action cannot be undone.</p>
+            <div class="modal-actions" style="justify-content: center;">
+                <button class="btn-cancel" onclick="closeModal('deleteModal')">Cancel</button>
+                <button class="btn-delete" id="confirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // 1. Firebase Configuration (Ensure YOUR_PROJECT_ID etc. are filled)
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT.appspot.com",
+        messagingSenderId: "YOUR_ID",
+        appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const clientsCol = collection(db, "clients");
+
+    deleteTargetId = null;
+
+    // 2. Real-time Listener (Syncs everyone's screen)
+    onSnapshot(clientsCol, (snapshot) => {
+        const clients = snapshot.docs.map(doc => ({ 
+            id: doc.id, // We use the Firebase Document ID
+            ...doc.data() 
+        }));
+        renderTable(clients); 
+    });
+
+    // 3. Render Table Function
+    function renderTable(data) {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = data.map((c, index) => `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${c.date}</td>
+                <td>${c.name} ${c.status === "Under Review" ? '<i data-lucide="alert-triangle" class="warning-icon"></i>' : ''}</td>
+                <td>${c.goal}</td>
+                <td>${c.assigned}</td>
+                <td>₹${Number(c.cost).toLocaleString('en-IN')}</td>
+                <td>${c.inf}%</td>
+                <td>${c.growth}%</td>
+                <td>₹${c.sip}</td>
+                <td class="risk-${c.risk}">${c.risk}</td>
+                <td><strong>₹${c.maturity}</strong></td>
+                <td>${c.years}</td>
+                <td>${c.asset}</td>
+                <td>${c.matYear}</td>
+                <td><span class="status-pill ${c.status.replace(' ', '-')}">${c.status}</span></td>
+                <td>
+                    <div class="action-icons">
+                        <i data-lucide="edit-3" class="edit-trigger" data-id="${c.id}"></i>
+                        <i data-lucide="trash-2" class="delete-trigger" data-id="${c.id}"></i>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+        lucide.createIcons();
+        updateStats(data);
+        setupActionListeners(data); // Re-attach click events to new icons
+    }
+
+    function updateStats(data) {
+        const pending = data.filter(c => c.status === "Under Review").length;
+        document.getElementById('statLine').innerHTML = `${data.length} clients <span class="pending">• ${pending} pending review</span>`;
+    }
+
+    // 4. Modal Logic
+    window.openModal = (mode, id = null) => {
+        const modal = document.getElementById('formModal');
+        const title = document.getElementById('modalTitle');
+        const btn = document.getElementById('submitBtn');
+        document.getElementById('clientForm').reset();
+        
+        if(mode === 'edit' && id) {
+            // Logic to find data from current table to pre-fill
+            title.innerText = "Edit Client Goal";
+            btn.innerText = "Update";
+            // Note: In module scripts, we'll handle pre-filling via the setupActionListeners
+        } else {
+            title.innerText = "Add New Client Goal";
+            btn.innerText = "Add Client";
+            document.getElementById('editId').value = "";
+            document.getElementById('f_date').valueAsDate = new Date();
+        }
+        modal.style.display = 'flex';
+    };
+
+    window.closeModal = (id) => { document.getElementById(id).style.display = 'none'; };
+
+    // 5. Submit to Firebase (Add or Update)
+    document.getElementById('clientForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('editId').value;
+        const years = parseInt(document.getElementById('f_total_years').value);
+        const dateVal = document.getElementById('f_date').value;
+        const matYear = new Date(dateVal).getFullYear() + years;
+
+        const entry = {
+            name: document.getElementById('f_name').value,
+            date: dateVal,
+            goal: document.getElementById('f_goal').value,
+            assigned: document.getElementById('f_assigned').value,
+            cost: parseInt(document.getElementById('f_cost').value),
+            inf: document.getElementById('f_inf').value,
+            growth: document.getElementById('f_growth').value,
+            sip: document.getElementById('f_sip').value + " (SIP)",
+            risk: document.getElementById('f_risk').value,
+            maturity: (parseInt(document.getElementById('f_cost').value) * 1.8).toLocaleString('en-IN'),
+            years: years,
+            asset: document.getElementById('f_asset').value,
+            matYear: matYear,
+            status: document.getElementById('f_status').value
+        };
+
+        try {
+            if(id) {
+                await updateDoc(doc(db, "clients", id), entry); //
+            } else {
+                await addDoc(clientsCol, entry); //
+            }
+            closeModal('formModal');
+        } catch (error) {
+            console.error("Error saving to Firebase:", error);
+        }
+    };
+
+    // 6. Delete Logic
+    document.getElementById('confirmDelete').onclick = async () => {
+        if(deleteTargetId) {
+            await deleteDoc(doc(db, "clients", deleteTargetId)); //
+            closeModal('deleteModal');
+        }
+    };
+
+    // Helper to handle dynamic icon clicks
+    function setupActionListeners(data) {
+        document.querySelectorAll('.edit-trigger').forEach(el => {
+            el.onclick = () => {
+                const id = el.getAttribute('data-id');
+                const c = data.find(x => x.id === id);
+                document.getElementById('editId').value = id;
+                document.getElementById('f_name').value = c.name;
+                document.getElementById('f_date').value = c.date;
+                document.getElementById('f_cost').value = c.cost;
+                document.getElementById('f_total_years').value = c.years;
+                document.getElementById('calc_val').innerText = '₹' + c.maturity;
+                document.getElementById('calc_year').innerText = c.matYear;
+                openModal('edit', id);
+            };
+        });
+
+        document.querySelectorAll('.delete-trigger').forEach(el => {
+            el.onclick = () => {
+                const id = el.getAttribute('data-id');
+                const c = data.find(x => x.id === id);
+                deleteTargetId = id;
+                document.getElementById('deleteText').innerText = `Remove ${c.name}'s "${c.goal}" goal? This action cannot be undone.`;
+                document.getElementById('deleteModal').style.display = 'flex';
+            };
+        });
+    }
+</script>
+
+    <script>
+        let clientData = [
+            { id: 1, date: "2024-01-15", name: "Arjun Mehta", goal: "UG Education", assigned: "Rahul Sharma", cost: 1500000, inf: 6, growth: 12, sip: "10,000 (SIP)", risk: "Moderate", maturity: "26,87,833", years: 10, asset: "Hybrid", matYear: 2034, status: "Active", alert: false },
+            { id: 2, date: "2023-06-20", name: "Kavitha Nair", goal: "Marriage", assigned: "Priya Patel", cost: 2500000, inf: 5, growth: 10, sip: "15,000 (SIP)", risk: "Aggressive", maturity: "40,72,241", years: 8, asset: "Equity", matYear: 2031, status: "Active", alert: false },
+            { id: 4, date: "2021-11-05", name: "Deepa Kulkarni", goal: "Home Purchase", assigned: "Sneha Reddy", cost: 5000000, inf: 7, growth: 14, sip: "20,00,000 (LS)", risk: "Aggressive", maturity: "92,54,310", years: 7, asset: "Equity", matYear: 2028, status: "Under Review", alert: true }
+        ];
+
+        let deleteTargetId = null;
+
+        function renderTable(data = clientData) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = data.map((c, index) => `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${c.date}</td>
+                    <td>${c.name} ${c.alert ? '<i data-lucide="alert-triangle" class="warning-icon"></i>' : ''}</td>
+                    <td>${c.goal}</td>
+                    <td>${c.assigned}</td>
+                    <td>₹${c.cost.toLocaleString('en-IN')}</td>
+                    <td>${c.inf}%</td>
+                    <td>${c.growth}%</td>
+                    <td>₹${c.sip}</td>
+                    <td class="risk-${c.risk}">${c.risk}</td>
+                    <td><strong>₹${c.maturity}</strong></td>
+                    <td>${c.years}</td>
+                    <td>${c.asset}</td>
+                    <td>${c.matYear}</td>
+                    <td><span class="status-pill ${c.status.replace(' ', '-')}">${c.status}</span></td>
+                    <td>
+                        <div class="action-icons">
+                            <i data-lucide="edit-3" onclick="openModal('edit', ${c.id})"></i>
+                            <i data-lucide="trash-2" onclick="openDeleteModal(${c.id})"></i>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+            updateStats();
+        }
+
+        function updateStats() {
+            const pending = clientData.filter(c => c.status === "Under Review").length;
+            document.getElementById('statLine').innerHTML = `${clientData.length} clients <span class="pending">• ${pending} pending review</span>`;
+        }
+
+        function openModal(mode, id = null) {
+            const modal = document.getElementById('formModal');
+            const title = document.getElementById('modalTitle');
+            const btn = document.getElementById('submitBtn');
+            document.getElementById('clientForm').reset();
+            
+            if(mode === 'edit') {
+                const c = clientData.find(x => x.id === id);
+                title.innerText = "Edit Client Goal";
+                btn.innerText = "Update";
+                document.getElementById('editId').value = c.id;
+                document.getElementById('f_name').value = c.name;
+                document.getElementById('f_date').value = c.date;
+                document.getElementById('f_cost').value = c.cost;
+                document.getElementById('f_total_years').value = c.years;
+                document.getElementById('calc_val').innerText = '₹' + c.maturity;
+                document.getElementById('calc_year').innerText = c.matYear;
+            } else {
+                title.innerText = "Add New Client Goal";
+                btn.innerText = "Add Client";
+                document.getElementById('editId').value = "";
+                document.getElementById('f_date').valueAsDate = new Date();
+            }
+            modal.style.display = 'flex';
+        }
+
+        function openDeleteModal(id) {
+            const c = clientData.find(x => x.id === id);
+            deleteTargetId = id;
+            document.getElementById('deleteText').innerText = `Remove ${c.name}'s "${c.goal}" goal? This action cannot be undone.`;
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        document.getElementById('clientForm').onsubmit = (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editId').value;
+            const years = parseInt(document.getElementById('f_total_years').value);
+            const dateVal = document.getElementById('f_date').value;
+            const matYear = new Date(dateVal).getFullYear() + years;
+
+            const entry = {
+                id: id ? parseInt(id) : Date.now(),
+                name: document.getElementById('f_name').value,
+                date: dateVal,
+                goal: document.getElementById('f_goal').value,
+                assigned: document.getElementById('f_assigned').value,
+                cost: parseInt(document.getElementById('f_cost').value),
+                inf: document.getElementById('f_inf').value,
+                growth: document.getElementById('f_growth').value,
+                sip: document.getElementById('f_sip').value + " (SIP)",
+                risk: document.getElementById('f_risk').value,
+                maturity: (parseInt(document.getElementById('f_cost').value) * 1.8).toLocaleString('en-IN'), // Simplified calc
+                years: years,
+                asset: document.getElementById('f_asset').value,
+                matYear: matYear,
+                status: document.getElementById('f_status').value,
+                alert: document.getElementById('f_status').value === "Under Review"
+            };
+
+            if(id) {
+                const index = clientData.findIndex(x => x.id === parseInt(id));
+                clientData[index] = entry;
+            } else {
+                clientData.push(entry);
+            }
+            renderTable();
+            closeModal('formModal');
+        };
+
+        document.getElementById('confirmDelete').onclick = () => {
+            clientData = clientData.filter(x => x.id !== deleteTargetId);
+            renderTable();
+            closeModal('deleteModal');
+        };
+
+        renderTable();
+    </script>
+</body>
+</html>
