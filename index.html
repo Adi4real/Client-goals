@@ -41,7 +41,7 @@
         
         .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; gap: 20px; }
         .brand-section { display: flex; align-items: center; gap: 30px; flex-grow: 1; }
-        .company-logo { width: 280px; height: 60px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .company-logo { width: 480px; height: 60px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .company-logo img { width: 100%; height: 100%; object-fit: contain; }
 
         @keyframes pulse-alert { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
@@ -107,7 +107,7 @@
                 <input type="password" id="loginPass" placeholder="••••••••">
             </div>
             <div class="login-group">
-                <label>Verification Code (OTP)</label>
+                <label>Verification code</label>
                 <input type="text" id="loginOtp" placeholder="Enter 6-digit token">
             </div>
             <button class="btn-login" onclick="handleLogin()">Sign In to Dashboard</button>
@@ -168,7 +168,7 @@
                     <div class="form-group">
                         <label>Goal</label>
                         <select id="f_goal" onchange="toggleCustomGoal(this.value)">
-                            <option>Child Marriage</option><option>UG Education</option><option>PG Education</option><option>Home Purchase</option><option>Retirement</option><option value="Custom">Custom...</option>
+                            <option>Children Marriage</option><option>UG Education</option><option>PG Education</option><option>Home Purchase</option><option>Retirement</option><option value="Custom">Custom...</option>
                         </select>
                         <input type="text" id="f_custom_goal" placeholder="Specify goal" style="display:none; margin-top:8px;">
                     </div>
