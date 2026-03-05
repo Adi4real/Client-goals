@@ -177,46 +177,57 @@
     </div>
 
     <div class="dashboard-container" id="mainDashboard">
-        <header class="dashboard-header">
-            <div class="brand-section">
-                <div>
-                    <h1 style="font-size: 20px; margin: 0; font-weight: 800; letter-spacing: -0.5px;">Financial Goal Planner</h1>
-                    <div style="display: flex; align-items: center; gap: 15px; margin-top: 4px;">
-                        <p class="stats" id="statLine" style="margin: 0; font-size: 12px; font-weight: 600; color: var(--text-muted);">Initializing...</p>
-                        <button class="btn-logout" onclick="handleLogout()">Logout</button>
-                    </div>
-                </div>
-                <div class="company-logo">
-                    <img src="logo.png" alt="FideloWealth Logo" id="logoImg">
-                </div>
+        <header class="dashboard-header" style="align-items: flex-end;">
+    <div class="brand-section">
+        <div class="company-logo" style="width: auto; height: 60px;">
+            <img src="logo.png" alt="FideloWealth Logo" id="logoImg" style="height: 100%;">
+        </div>
+        <div style="border-left: 2px solid var(--border-color); padding-left: 20px;">
+            <h1 style="font-size: 18px; margin: 0; font-weight: 800; letter-spacing: -0.5px; color: #001f3f;">Financial Goal Planner</h1>
+            <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px;">
+                <p class="stats" id="statLine" style="margin: 0; font-size: 11px; font-weight: 600; color: var(--text-muted);">Initializing...</p>
+                <button class="btn-logout" onclick="handleLogout()">Logout</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="search-controls" style="gap: 15px;">
+        <div style="display: flex; gap: 8px; background: #f1f5f9; padding: 6px; border-radius: 10px; border: 1px solid var(--border-color);">
+            <div class="search-group review-outlook-box" style="border: none; background: #fff; border-radius: 6px; padding: 0 8px;">
+                <i data-lucide="calendar-clock" style="width:14px; color:#d97706; margin-right: 5px;"></i>
+                <label style="font-size: 9px;">Review in</label>
+                <input type="number" id="reviewFilterYears" placeholder="N" style="width: 30px; border:none; background:transparent; font-weight:700; padding: 8px 0;" oninput="applyFilters()">
+                <span style="font-size:9px; font-weight:800; color:#d97706;">YRS</span>
+            </div>
+
+            <div class="search-group" style="background: #fff; border-radius: 6px; border: 1px solid var(--border-color);">
+                <i data-lucide="users" style="width:14px;"></i>
+                <select id="filterAssigned" style="width: 130px; border:none; background:transparent; padding-left: 30px;" onchange="applyFilters()">
+                    <option value="All">All Staff</option>
+                    <option>Uday Pratap Singh</option>
+                    <option>Ujjwal Kumar</option>
+                    <option>Prince B Thoppil</option>
+                    <option>Joel Herbet</option>
+                    <option>Manfred</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <div class="search-group">
+                <i data-lucide="search" style="width:16px;"></i>
+                <input type="text" id="searchInput" placeholder="Search client name..." style="width: 180px;" oninput="applyFilters()">
             </div>
             
-            <div class="search-controls">
-                <div class="search-group review-outlook-box">
-                    <i data-lucide="calendar-clock" style="width:14px; color:#d97706; margin-right: 5px;"></i>
-                    <label>Review in</label>
-                    <input type="number" id="reviewFilterYears" placeholder="N" style="width: 35px; border:none; background:transparent; font-weight:700;" oninput="applyFilters()">
-                    <span style="font-size:10px; font-weight:800; color:#d97706;">Yrs</span>
-                </div>
-
-                <div class="search-group">
-                    <i data-lucide="users"></i>
-                    <select id="filterAssigned" style="width: 140px;" onchange="applyFilters()">
-                        <option value="All">All Staff</option>
-                        <option>Uday Pratap Singh</option><option>Ujjwal Kumar</option><option>Prince B Thoppil</option><option>Joel Herbet</option><option>Manfred</option>
-                    </select>
-                </div>
-
-                <div class="search-group">
-                    <i data-lucide="search"></i>
-                    <input type="text" id="searchInput" placeholder="Search..." oninput="applyFilters()">
-                </div>
-                
-                <button class="btn-export" onclick="exportToExcel()"><i data-lucide="file-spreadsheet"></i> Export</button>
-                <button class="btn-add" onclick="openModal()"><i data-lucide="plus"></i> Create Plan</button>
-            </div>
-        </header>
-
+            <button class="btn-export" onclick="exportToExcel()" style="white-space: nowrap;">
+                <i data-lucide="file-spreadsheet" style="width:16px;"></i> Export
+            </button>
+            <button class="btn-add" onclick="openModal()" style="white-space: nowrap;">
+                <i data-lucide="plus" style="width:16px;"></i> Create Plan
+            </button>
+        </div>
+    </div>
+</header>
         <div class="table-wrapper">
             <table>
                 <thead>
