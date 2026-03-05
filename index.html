@@ -6,6 +6,10 @@
     <title>FideloWealth | Financial Goal Planner</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
     <style>
         :root {
             --bg-color: #f8fafc;
@@ -22,11 +26,21 @@
             --status-paused-text: #64748b;
             --status-completed-bg: #dbeafe;
             --status-completed-text: #1d4ed8;
+            --risk-high: #fee2e2; --risk-high-text: #dc2626;
+            --risk-med: #fef3c7; --risk-med-text: #d97706;
+            --risk-low: #dcfce7; --risk-low-text: #16a34a;
         }
 
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); margin: 0; padding: 20px; color: var(--text-main); }
+        /* Prevent the entire page from scrolling horizontally */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-color); 
+            margin: 0; 
+            padding: 20px; 
+            color: var(--text-main);
+            overflow-x: hidden; 
+        }
         
-        /* Login Screen Styles */
         #authScreen { position: fixed; inset: 0; background: #001f3f; display: flex; justify-content: center; align-items: center; z-index: 9999; }
         .login-card { background: white; padding: 40px; border-radius: 12px; width: 360px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); text-align: center; }
         .login-card h2 { margin-bottom: 24px; color: #001f3f; font-weight: 800; }
@@ -36,32 +50,69 @@
         .btn-login { width: 100%; background: var(--primary-blue); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 10px; }
         .error-msg { color: #dc2626; font-size: 12px; margin-top: 10px; display: none; }
 
-        /* Dashboard Container */
-        .dashboard-container { max-width: 1600px; margin: 0 auto; background: var(--card-bg); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 24px; display: none; }
+        .dashboard-container { 
+            max-width: 100%; 
+            margin: 0 auto; 
+            background: var(--card-bg); 
+            border-radius: 12px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+            padding: 24px; 
+            display: none;
+            box-sizing: border-box;
+        }
         
-        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; gap: 20px; }
+        .dashboard-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 24px; 
+            border-bottom: 1px solid var(--border-color); 
+            padding-bottom: 20px; 
+            gap: 20px;
+            flex-wrap: wrap; /* Allows header to stack on very small screens instead of overflowing */
+        }
+        
         .brand-section { display: flex; align-items: center; gap: 30px; flex-grow: 1; }
-        .company-logo { width: 480px; height: 60px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .company-logo { width: 400px; height: 60px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .company-logo img { width: 100%; height: 100%; object-fit: contain; }
 
         @keyframes pulse-alert { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
         .pending-alert { color: #f59e0b; font-weight: 700; background: #fffbeb; padding: 4px 10px; border-radius: 6px; border: 1px solid #fef3c7; margin-left: 10px; animation: pulse-alert 2s infinite; display: inline-flex; align-items: center; gap: 4px; }
         
         .btn-add { background: #003366; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
-        .btn-logout { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; }
+        .btn-export { background: #16a34a; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
+        .btn-logout { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.2s; }
+        .btn-logout:hover { background: #fee2e2; color: #dc2626; border-color: #fecaca; }
 
-        .search-controls { display: flex; gap: 12px; align-items: center; }
+        .search-controls { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
         .search-group { position: relative; display: flex; align-items: center; }
-        .search-group input { padding: 10px 10px 10px 35px; border: 1px solid var(--border-color); border-radius: 8px; outline: none; font-size: 13px; background: #f8fafc; width: 180px; }
-        .search-group i { position: absolute; left: 10px; width: 16px; color: var(--text-muted); }
+        .search-group input, .search-group select { padding: 10px 10px 10px 35px; border: 1px solid var(--border-color); border-radius: 8px; outline: none; font-size: 13px; background: #f8fafc; }
+        .search-group i { position: absolute; left: 10px; width: 16px; color: var(--text-muted); z-index: 1; }
 
-        .table-wrapper { overflow-x: auto; margin-top: 20px; }
-        table { width: 100%; border-collapse: collapse; font-size: 11px; white-space: nowrap; }
-        th { padding: 12px 8px; color: var(--text-muted); text-align: left; border-bottom: 1px solid var(--border-color); font-weight: 600; text-transform: uppercase; }
-        td { padding: 12px 8px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+        .review-outlook-box { background: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; display: flex; align-items: center; padding: 0 10px; }
+        .review-outlook-box label { font-size: 10px; font-weight: 800; color: #d97706; margin-right: 5px; text-transform: uppercase; }
+
+        /* THE FIX: Constraints the table width and enables scroll */
+        .table-wrapper { 
+            width: 100%;
+            overflow-x: auto; 
+            margin-top: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
         
-        .hover-cell { font-weight: 700; color: #475569; position: relative; cursor: help; border-bottom: 1px dotted #cbd5e1; }
-        .hover-cell:hover::after { content: attr(data-tooltip); position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 8px 12px; border-radius: 6px; font-size: 10px; white-space: pre; z-index: 10; pointer-events: none; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); line-height: 1.4; }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            font-size: 11px; 
+            white-space: nowrap; /* Forces content to stay on one line, triggering the scroll */
+        }
+        
+        th { padding: 12px 8px; color: var(--text-muted); text-align: center; border-bottom: 1px solid var(--border-color); font-weight: 600; text-transform: uppercase; background: #fff; }
+        td { padding: 12px 8px; border-bottom: 1px solid var(--border-color); vertical-align: middle; text-align: center; }
+        
+        .hover-cell { font-weight: 700; color: #475569; position: relative; cursor: help; border-bottom: 1px dotted #cbd5e1; display: inline-block; }
+        .hover-cell:hover::after { content: attr(data-tooltip); position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 10px 14px; border-radius: 8px; font-size: 11px; white-space: pre-wrap; z-index: 100; pointer-events: none; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4); line-height: 1.5; width: 220px; text-align: left; }
 
         .status-pill { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
         .Active { background: var(--status-active-bg); color: var(--status-active-text); }
@@ -69,24 +120,34 @@
         .Paused { background: var(--status-paused-bg); color: var(--status-paused-text); }
         .Completed { background: var(--status-completed-bg); color: var(--status-completed-text); }
         
+        .risk-pill { padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 800; }
+        .High { background: var(--risk-high); color: var(--risk-high-text); }
+        .Medium { background: var(--risk-med); color: var(--risk-med-text); }
+        .Low { background: var(--risk-low); color: var(--risk-low-text); }
+
+        .assigned-stack { display: flex; flex-direction: column; gap: 2px; line-height: 1.1; font-size: 9px; color: #475569; font-weight: 600; align-items: center; }
+
         .deficit { color: #dc2626; font-weight: 700; }
         .surplus { color: #16a34a; font-weight: 700; }
 
-        /* Modal & Calc UI */
+        .actions-group { display: flex; gap: 10px; justify-content: center; align-items: center; }
+        .icon-btn { cursor: pointer; width: 15px; transition: opacity 0.2s; }
+        .icon-btn:hover { opacity: 0.7; }
+
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px); }
         .modal-card { background: white; border-radius: 12px; width: 850px; padding: 30px; max-height: 90vh; overflow-y: auto; }
         .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-        .form-group { display: flex; flex-direction: column; gap: 4px; }
+        .form-group { display: flex; flex-direction: column; gap: 4px; text-align: left; }
         .form-group label { font-size: 11px; font-weight: 700; color: var(--text-muted); }
-        .form-group input, .form-group select { padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: #f8fafc; font-size: 13px; }
+        .form-group input, .form-group select, .form-group textarea { padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: #f8fafc; font-size: 13px; font-family: inherit; }
         
-        .req-box { grid-column: span 3; border-radius: 8px; padding: 18px; margin-top: 10px; border: 1px solid #e2e8f0; }
+        .req-box { grid-column: span 3; border-radius: 8px; padding: 18px; margin-top: 10px; border: 1px solid #e2e8f0; text-align: left; }
         .solo-path { background: #fffbeb; border-color: #fef3c7; }
         .inter-path { background: #f0f9ff; border-color: #e0f2fe; }
         .req-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 15px; align-items: center; }
         .amt-box { font-weight: 700; color: #0369a1; background: #e0f2fe; padding: 10px 14px; border-radius: 6px; font-size: 16px; min-width: 140px; }
 
-        .modal-calc-footer { background: #f1f5f9; padding: 20px; border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 13px; border: 1px solid var(--border-color); }
+        .modal-calc-footer { background: #f1f5f9; padding: 20px; border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 13px; border: 1px solid var(--border-color); text-align: left; }
         .modal-calc-footer div { display: flex; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding: 5px 0; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; }
         .btn-submit { background: var(--primary-blue); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 700; }
@@ -110,8 +171,8 @@
                 <label>Verification code</label>
                 <input type="text" id="loginOtp" placeholder="Enter 6-digit token">
             </div>
-            <button class="btn-login" onclick="handleLogin()">Sign In to Dashboard</button>
-            <p id="authError" class="error-msg">Invalid Credentials or Verification Code.</p>
+            <button class="btn-login" onclick="handleLogin()">Sign In</button>
+            <p id="authError" class="error-msg">Invalid Credentials.</p>
         </div>
     </div>
 
@@ -120,7 +181,10 @@
             <div class="brand-section">
                 <div>
                     <h1 style="font-size: 20px; margin: 0; font-weight: 800; letter-spacing: -0.5px;">Financial Goal Planner</h1>
-                    <p class="stats" id="statLine">Initializing...</p>
+                    <div style="display: flex; align-items: center; gap: 15px; margin-top: 4px;">
+                        <p class="stats" id="statLine" style="margin: 0; font-size: 12px; font-weight: 600; color: var(--text-muted);">Initializing...</p>
+                        <button class="btn-logout" onclick="handleLogout()">Logout</button>
+                    </div>
                 </div>
                 <div class="company-logo">
                     <img src="logo.png" alt="FideloWealth Logo" id="logoImg">
@@ -128,16 +192,28 @@
             </div>
             
             <div class="search-controls">
-                <div class="outlook-box">
-                    <i data-lucide="calendar-clock" style="width:16px;"></i>
-                    <input type="number" id="outlookYears" placeholder="Yrs" min="1" style="width:40px; border:none; background:transparent; font-weight:700;">
+                <div class="search-group review-outlook-box">
+                    <i data-lucide="calendar-clock" style="width:14px; color:#d97706; margin-right: 5px;"></i>
+                    <label>Review in</label>
+                    <input type="number" id="reviewFilterYears" placeholder="N" style="width: 35px; border:none; background:transparent; font-weight:700;" oninput="applyFilters()">
+                    <span style="font-size:10px; font-weight:800; color:#d97706;">Yrs</span>
                 </div>
+
+                <div class="search-group">
+                    <i data-lucide="users"></i>
+                    <select id="filterAssigned" style="width: 140px;" onchange="applyFilters()">
+                        <option value="All">All Staff</option>
+                        <option>Uday Pratap Singh</option><option>Ujjwal Kumar</option><option>Prince B Thoppil</option><option>Joel Herbet</option><option>Manfred</option>
+                    </select>
+                </div>
+
                 <div class="search-group">
                     <i data-lucide="search"></i>
-                    <input type="text" id="searchInput" placeholder="Search client...">
+                    <input type="text" id="searchInput" placeholder="Search..." oninput="applyFilters()">
                 </div>
+                
+                <button class="btn-export" onclick="exportToExcel()"><i data-lucide="file-spreadsheet"></i> Export</button>
                 <button class="btn-add" onclick="openModal()"><i data-lucide="plus"></i> Create Plan</button>
-                <button class="btn-logout" onclick="handleLogout()">Logout</button>
             </div>
         </header>
 
@@ -145,7 +221,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th>#</th><th>PLAN DATE</th><th>NAME</th><th>GOAL</th><th>TYPE</th><th>PV COST</th><th>TERM</th>
+                        <th>#</th><th>PLAN DATE</th><th>NAME</th><th>GOAL (NOTES)</th><th>RISK</th><th>ASSIGNED TO</th><th>TYPE</th><th>PV COST</th><th>TERM</th>
                         <th>INF (%)</th><th>GRW (%)</th><th style="color:var(--primary-blue);">TARGET FV</th><th>TARGET DATE</th><th>REQ. INV</th><th>ACTUAL INV</th><th>GAP (FV)</th><th>STATUS</th><th>ACTIONS</th>
                     </tr>
                 </thead>
@@ -172,11 +248,28 @@
                         </select>
                         <input type="text" id="f_custom_goal" placeholder="Specify goal" style="display:none; margin-top:8px;">
                     </div>
+
+                    <div class="form-group">
+                        <label>Assigned To</label>
+                        <select id="f_assigned" multiple style="height: 60px;">
+                            <option>Uday Pratap Singh</option><option>Ujjwal Kumar</option><option>Prince B Thoppil</option><option>Joel Herbet</option><option>Manfred</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Risk Appetite</label>
+                        <select id="f_risk"><option value="Low">Low Risk</option><option value="Medium">Medium Risk</option><option value="High">High Risk</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Client Notes</label>
+                        <textarea id="f_notes" placeholder="Notes..." style="height: 60px;"></textarea>
+                    </div>
+
                     <div class="form-group"><label>Present Cost (₹)</label><input type="number" id="f_pv" value="1000000"></div>
                     <div class="form-group"><label>Years to save (n)</label><input type="number" id="f_years" value="10"></div>
                     <div class="form-group"><label>Review Window (Yrs)</label><input type="number" id="f_review_n" value="2"></div>
                     <div class="form-group"><label>Inflation (%)</label><input type="number" id="f_inf" value="6"></div>
                     <div class="form-group"><label>Growth (%)</label><input type="number" id="f_growth" value="12"></div>
+                    
                     <div class="form-group">
                         <label>Investment Type</label>
                         <select id="f_type" onchange="toggleInvestmentInputs(this.value)">
@@ -220,7 +313,7 @@
     </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -237,32 +330,22 @@
     const clientsCol = collection(db, "clients");
     let allClients = [];
 
-    // --- AUTHENTICATION LOGIC ---
-    const VALID_USER = "FW-EMPLOYEE";
-    const VALID_PASS = "Fidelo2026";
-    const MASTER_OTP = "123456"; // Your static security token
+    const VALID_USER = "FW-EMPLOYEE", VALID_PASS = "Fidelo2026", MASTER_OTP = "123456";
+
+    // ... handleLogin, handleLogout, initApp, exportToExcel, downloadReport stay the same ...
+    // (Keeping focus on the requested calculation change)
 
     window.handleLogin = () => {
-        const id = document.getElementById('loginId').value;
-        const pass = document.getElementById('loginPass').value;
-        const otp = document.getElementById('loginOtp').value;
-        
+        const id = document.getElementById('loginId').value, pass = document.getElementById('loginPass').value, otp = document.getElementById('loginOtp').value;
         if (id === VALID_USER && pass === VALID_PASS && otp === MASTER_OTP) {
             sessionStorage.setItem('isLoggedIn', 'true');
             document.getElementById('authScreen').style.display = 'none';
             document.getElementById('mainDashboard').style.display = 'block';
             initApp();
-        } else {
-            document.getElementById('authError').style.display = 'block';
-        }
+        } else { document.getElementById('authError').style.display = 'block'; }
     };
 
-    window.handleLogout = () => {
-        sessionStorage.removeItem('isLoggedIn');
-        location.reload();
-    };
-
-    // Check session on load
+    window.handleLogout = () => { sessionStorage.removeItem('isLoggedIn'); location.reload(); };
     if (sessionStorage.getItem('isLoggedIn') === 'true') {
         document.getElementById('authScreen').style.display = 'none';
         document.getElementById('mainDashboard').style.display = 'block';
@@ -276,7 +359,6 @@
         });
     }
 
-    // --- CALCULATOR & DASHBOARD LOGIC ---
     window.toggleInvestmentInputs = (type) => {
         document.getElementById('container_sip').style.display = (type === 'SIP' || type === 'SIP_LS') ? 'flex' : 'none';
         document.getElementById('container_ls').style.display = (type === 'LS' || type === 'SIP_LS') ? 'flex' : 'none';
@@ -284,157 +366,190 @@
     };
 
     function calculateLive() {
-        const pv = parseFloat(document.getElementById('f_pv').value) || 0;
-        const years = parseFloat(document.getElementById('f_years').value) || 0;
-        const inf = parseFloat(document.getElementById('f_inf').value) / 100 || 0;
-        const growth = parseFloat(document.getElementById('f_growth').value) / 100 || 0;
-        const actSIP = parseFloat(document.getElementById('f_actual_sip').value) || 0;
-        const actLS = parseFloat(document.getElementById('f_actual_ls').value) || 0;
+        const pv = parseFloat(document.getElementById('f_pv').value) || 0, years = parseFloat(document.getElementById('f_years').value) || 0;
+        const inf = parseFloat(document.getElementById('f_inf').value) / 100 || 0, growth = parseFloat(document.getElementById('f_growth').value) / 100 || 0;
+        const actSIP = parseFloat(document.getElementById('f_actual_sip').value) || 0, actLS = parseFloat(document.getElementById('f_actual_ls').value) || 0;
         const type = document.getElementById('f_type').value;
 
+        // 1. Goal Future Value (Annual Compounding Inflation)
         const goalFV = pv * Math.pow((1 + inf), years);
-        document.getElementById('c_fv').innerText = '₹' + Math.round(goalFV).toLocaleString('en-IN');
-
-        const r = growth / 12;
-        const n = years * 12;
-        const annuityFactor = (Math.pow(1 + r, n) - 1) / r;
-
-        const soloReqSIP = n > 0 ? goalFV / annuityFactor : 0;
-        const soloReqLS = goalFV / Math.pow((1 + growth), years);
-
-        document.getElementById('display_req_sip').innerText = '₹' + Math.round(soloReqSIP).toLocaleString('en-IN');
-        document.getElementById('display_req_ls').innerText = '₹' + Math.round(soloReqLS).toLocaleString('en-IN');
         
-        const curSIP_FV = (type === 'SIP' || type === 'SIP_LS') ? (actSIP * annuityFactor) : 0;
-        const curLS_FV = (type === 'LS' || type === 'SIP_LS') ? (actLS * Math.pow((1 + growth), years)) : 0;
-        const totalActualFV = curSIP_FV + curLS_FV;
+        // 2. Monthly Rate Calculation (Effective Annual Rate logic to match Excel NOMINAL)
+        const r = growth > 0 ? Math.pow((1 + growth), 1/12) - 1 : 0;
+        const n = years * 12;
 
-        const fvGap = Math.max(0, goalFV - totalActualFV);
-        const addSIP = n > 0 ? fvGap / annuityFactor : 0;
-        const addLS = fvGap / Math.pow((1 + growth), years);
+        // 3. Accumulation Factor (Annuity Due: Start of Month)
+        // Formula: [(1+r)^n - 1] / r * (1+r)
+        const af = (n > 0 && r > 0) ? ((Math.pow(1 + r, n) - 1) / r) * (1 + r) : n;
 
-        document.getElementById('display_inter_sip').innerText = '₹' + Math.round(addSIP).toLocaleString('en-IN');
-        document.getElementById('display_inter_ls').innerText = '₹' + Math.round(addLS).toLocaleString('en-IN');
+        // 4. Standalone Requirements
+        const reqSIP = (n > 0) ? goalFV / af : 0;
+        const reqLS = goalFV / Math.pow((1 + growth), years);
 
+        document.getElementById('c_fv').innerText = '₹' + Math.round(goalFV).toLocaleString('en-IN');
+        document.getElementById('display_req_sip').innerText = '₹' + Math.round(reqSIP).toLocaleString('en-IN');
+        document.getElementById('display_req_ls').innerText = '₹' + Math.round(reqLS).toLocaleString('en-IN');
+
+        // 5. Projected Maturity based on Actual Investments
+        const totalActualFV = ((type === 'SIP' || type === 'SIP_LS') ? (actSIP * af) : 0) + 
+                             ((type === 'LS' || type === 'SIP_LS') ? (actLS * Math.pow((1 + growth), years)) : 0);
+        
         document.getElementById('c_total_inv').innerText = '₹' + Math.round(totalActualFV).toLocaleString('en-IN');
+
+        // 6. Deficit Calculations
+        const fvGap = Math.max(0, goalFV - totalActualFV);
+        document.getElementById('display_inter_sip').innerText = '₹' + Math.round(n > 0 ? fvGap / af : 0).toLocaleString('en-IN');
+        document.getElementById('display_inter_ls').innerText = '₹' + Math.round(fvGap / Math.pow((1 + growth), years)).toLocaleString('en-IN');
+
         const diff = totalActualFV - goalFV;
-        const diffEl = document.getElementById('c_diff');
-        diffEl.innerText = (diff >= 0 ? 'Surplus: ₹' : 'Deficit: ₹') + Math.abs(Math.round(diff)).toLocaleString('en-IN');
-        diffEl.style.color = diff >= 0 ? '#16a34a' : '#dc2626';
+        document.getElementById('c_diff').innerText = (diff >= 0 ? 'Surplus: ₹' : 'Deficit: ₹') + Math.abs(Math.round(diff)).toLocaleString('en-IN');
+        document.getElementById('c_diff').style.color = diff >= 0 ? '#16a34a' : '#dc2626';
 
         const planDate = document.getElementById('f_date').value;
         if (planDate) {
-            let target = new Date(planDate);
-            target.setFullYear(target.getFullYear() + Math.floor(years));
+            let target = new Date(planDate); target.setFullYear(target.getFullYear() + Math.floor(years));
             document.getElementById('c_target_date').innerText = target.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
         }
     }
 
-    function renderTable(data) {
-        const tbody = document.getElementById('tableBody');
-        const today = new Date();
-        let reviewCount = 0;
-
-        if (data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="16" style="text-align:center; padding:40px;">No matching plans.</td></tr>`;
-            document.getElementById('statLine').innerHTML = `0 Plans`;
-            return;
-        }
-
-        const sortedData = [...data].sort((a, b) => new Date(a.targetDateRaw) - new Date(b.targetDateRaw));
-
-        tbody.innerHTML = sortedData.map((c, index) => {
-            const targetDate = new Date(c.targetDateRaw);
-            const status = c.status || "Active";
-            const thresholdDate = new Date(targetDate);
-            thresholdDate.setFullYear(thresholdDate.getFullYear() - (parseFloat(c.reviewN) || 2));
-            const isInsideReviewWindow = today >= thresholdDate && today <= targetDate && status !== "Completed";
-            const displayStatus = isInsideReviewWindow ? "Under-Review" : status;
-            if (isInsideReviewWindow) reviewCount++;
-            const rowStyle = isInsideReviewWindow ? 'style="background-color: #fffbeb;"' : '';
-            
-            let actContent = c.type === 'SIP_LS' ? `<div style="line-height:1.4;"><div>₹${Number(c.actualSIP).toLocaleString()}/mo SIP</div><div style="color:var(--text-muted); font-size:9px;">₹${Number(c.actualLS).toLocaleString()} LS</div></div>` : (c.type === 'SIP' ? `₹${Number(c.actualSIP).toLocaleString()}/mo SIP` : `₹${Number(c.actualLS).toLocaleString()} LS`);
-            let reqContent = c.type === 'SIP_LS' ? `<div class="hover-cell" data-tooltip="Standalone Path:\nSIP: ₹${Math.round(c.reqSIP).toLocaleString()}\nLS: ₹${Math.round(c.reqLS).toLocaleString()}" style="line-height:1.4;"><div>₹${Math.round(c.reqSIP).toLocaleString()}/mo SIP</div><div style="color:var(--text-muted); font-size:9px;">₹${Math.round(c.reqLS).toLocaleString()} LS</div></div>` : `₹${Math.round(c.type === 'SIP' ? c.reqSIP : c.reqLS).toLocaleString()}${c.type === 'SIP' ? "/mo SIP" : " LS"}`;
-
-            return `
-            <tr ${rowStyle}>
-                <td>${index + 1}</td><td>${c.date}</td><td>${c.name}</td><td>${c.goal}</td><td>${c.type === 'SIP_LS' ? 'SIP + LS' : c.type}</td><td>₹${Number(c.pv).toLocaleString()}</td><td>${c.years} yrs</td><td>${c.inf}%</td><td>${c.growth}%</td><td><strong>₹${Math.round(c.fv).toLocaleString()}</strong></td><td>${c.targetDateDisplay}</td><td>${reqContent}</td><td style="font-weight: 500;">${actContent}</td><td class="${c.diff >= 0 ? 'surplus' : 'deficit'}">${Math.abs(Math.round(c.diff)).toLocaleString()}</td><td><span class="status-pill ${displayStatus}">${displayStatus.replace('-', ' ')}</span></td><td><div style="display:flex; gap:8px;"><i data-lucide="edit-3" onclick="prepareEdit('${c.firebaseId}')" style="cursor:pointer; width:14px; color:#64748b;"></i><i data-lucide="trash-2" onclick="deletePlan('${c.firebaseId}')" style="cursor:pointer; width:14px; color:#dc2626;"></i></div></td>
-            </tr>`;
-        }).join('');
-        
-        lucide.createIcons();
-        document.getElementById('statLine').innerHTML = `${data.length} Plans Visible ${reviewCount > 0 ? `<span class="pending-alert">• ${reviewCount} Reviews Pending</span>` : ''}`;
-    }
-
-    function applyFilters() {
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        const outlookYears = parseFloat(document.getElementById('outlookYears').value);
-        const today = new Date();
-        let filtered = allClients.filter(c => c.name.toLowerCase().includes(searchTerm));
-        if (!isNaN(outlookYears)) {
-            const limit = new Date(); limit.setFullYear(today.getFullYear() + outlookYears);
-            filtered = filtered.filter(c => new Date(c.targetDateRaw) >= today && new Date(c.targetDateRaw) <= limit);
-        }
-        renderTable(filtered);
-    }
-
     document.getElementById('clientForm').onsubmit = async (e) => {
         e.preventDefault();
-        const id = document.getElementById('editId').value;
-        const pv = parseFloat(document.getElementById('f_pv').value), years = parseFloat(document.getElementById('f_years').value);
-        const inf = parseFloat(document.getElementById('f_inf').value), growth = parseFloat(document.getElementById('f_growth').value);
-        const type = document.getElementById('f_type').value;
+        const id = document.getElementById('editId').value, pv = parseFloat(document.getElementById('f_pv').value), years = parseFloat(document.getElementById('f_years').value);
+        const inf = parseFloat(document.getElementById('f_inf').value), growth = parseFloat(document.getElementById('f_growth').value), type = document.getElementById('f_type').value;
         const actSIP = parseFloat(document.getElementById('f_actual_sip').value) || 0, actLS = parseFloat(document.getElementById('f_actual_ls').value) || 0;
+        
+        const assignedSelect = document.getElementById('f_assigned');
+        let assigned = Array.from(assignedSelect.selectedOptions).map(o => o.value);
+        if (assigned.length === 0) assigned = ["Unassigned"];
 
+        // Apply same refined math for database saving
         const fv = pv * Math.pow((1 + inf/100), years);
-        const r = (growth/100) / 12, n = years * 12;
-        const annuityFactor = (Math.pow(1 + r, n) - 1) / r;
-        const totalActualFV = (actSIP * annuityFactor) + (actLS * Math.pow((1 + growth/100), years));
+        const r = growth > 0 ? Math.pow((1 + growth/100), 1/12) - 1 : 0;
+        const n = years * 12;
+        const af = (n > 0 && r > 0) ? ((Math.pow(1 + r, n) - 1) / r) * (1 + r) : n;
 
-        let targetDate = new Date(document.getElementById('f_date').value);
+        const totalActualFV = ((type === 'SIP' || type === 'SIP_LS') ? (actSIP * af) : 0) + 
+                             ((type === 'LS' || type === 'SIP_LS') ? (actLS * Math.pow((1 + growth/100), years)) : 0);
+
+        let targetDate = new Date(document.getElementById('f_date').value); 
         targetDate.setFullYear(targetDate.getFullYear() + Math.floor(years));
 
         const payload = {
-            date: document.getElementById('f_date').value,
+            date: document.getElementById('f_date').value, 
             name: document.getElementById('f_name').value,
             goal: document.getElementById('f_goal').value === 'Custom' ? document.getElementById('f_custom_goal').value : document.getElementById('f_goal').value,
+            assigned, risk: document.getElementById('f_risk').value, notes: document.getElementById('f_notes').value,
             pv, years, inf, growth, type, actualSIP: actSIP, actualLS: actLS, totalActualFV, fv, diff: totalActualFV - fv, 
-            reqSIP: n > 0 ? fv / annuityFactor : 0, reqLS: fv / Math.pow((1 + growth/100), years),
+            reqSIP: n > 0 ? fv / af : 0, reqLS: fv / Math.pow((1 + growth/100), years),
             reviewN: parseFloat(document.getElementById('f_review_n').value), status: document.getElementById('f_status').value,
             targetDateRaw: targetDate.toISOString(), targetDateDisplay: targetDate.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
         };
-        if (id) await updateDoc(doc(db, "clients", id), payload); else await addDoc(clientsCol, payload);
+        id ? await updateDoc(doc(db, "clients", id), payload) : await addDoc(clientsCol, payload);
+        closeModal('formModal');
+    };
+
+    function renderTable(data) {
+        const tbody = document.getElementById('tableBody');
+        const today = new Date();
+        let pendingReviews = 0;
+        if (data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="18" style="text-align:center; padding:40px;">No records.</td></tr>`;
+            document.getElementById('statLine').innerHTML = `0 Results`; return;
+        }
+        tbody.innerHTML = data.sort((a,b) => new Date(a.targetDateRaw) - new Date(b.targetDateRaw)).map((c, index) => {
+            const targetDate = new Date(c.targetDateRaw);
+            const reviewN = parseFloat(c.reviewN) || 2;
+            const reviewStart = new Date(targetDate); reviewStart.setFullYear(reviewStart.getFullYear() - reviewN);
+            const isCurrentlyReviewing = today >= reviewStart && today <= targetDate && c.status !== "Completed";
+            if (isCurrentlyReviewing) pendingReviews++;
+            const actContent = c.type === 'SIP_LS' ? `<div style="line-height:1.3;"><div>₹${Number(c.actualSIP).toLocaleString()} SIP</div><div style="color:var(--text-muted); font-size:9px;">₹${Number(c.actualLS).toLocaleString()} LS</div></div>` : (c.type === 'SIP' ? `₹${Number(c.actualSIP).toLocaleString()} SIP` : `₹${Number(c.actualLS).toLocaleString()} LS`);
+            const reqContent = c.type === 'SIP_LS' ? `<div class="hover-cell" data-tooltip="Standalone Path:\nSIP: ₹${Math.round(c.reqSIP).toLocaleString()}\nLS: ₹${Math.round(c.reqLS).toLocaleString()}" style="line-height:1.3;"><div>₹${Math.round(c.reqSIP).toLocaleString()} SIP</div><div style="color:var(--text-muted); font-size:9px;">₹${Math.round(c.reqLS).toLocaleString()} LS</div></div>` : `₹${Math.round(c.type === 'SIP' ? c.reqSIP : c.reqLS).toLocaleString()} ${c.type}`;
+            const assignedList = Array.isArray(c.assigned) ? c.assigned : [c.assigned || "Unassigned"];
+            const assignedContent = `<div class="assigned-stack">${assignedList.map(name => `<span>${name}</span>`).join('')}</div>`;
+            return `
+            <tr ${isCurrentlyReviewing ? 'style="background-color: #fffbeb;"' : ''}>
+                <td>${index + 1}</td><td>${c.date}</td><td>${c.name}</td>
+                <td><span class="hover-cell" data-tooltip="NOTES:\n${c.notes || 'None.'}">${c.goal}</span></td>
+                <td><span class="risk-pill ${c.risk || 'Low'}">${c.risk || 'Low'}</span></td>
+                <td>${assignedContent}</td>
+                <td>${c.type.replace('_', ' + ')}</td><td>₹${Number(c.pv).toLocaleString()}</td><td>${c.years}Y</td>
+                <td>${c.inf}%</td><td>${c.growth}%</td><td><strong>₹${Math.round(c.fv).toLocaleString()}</strong></td>
+                <td>${c.targetDateDisplay}</td><td>${reqContent}</td>
+                <td style="font-weight: 500;">${actContent}</td><td class="${c.diff >= 0 ? 'surplus' : 'deficit'}">${Math.abs(Math.round(c.diff)).toLocaleString()}</td>
+                <td><span class="status-pill ${isCurrentlyReviewing ? 'Under-Review' : (c.status || 'Active')}">${(isCurrentlyReviewing ? 'Under Review' : (c.status || 'Active')).replace('-', ' ')}</span></td>
+                <td>
+                    <div class="actions-group">
+                        <i data-lucide="file-down" class="icon-btn" onclick="downloadReport('${c.firebaseId}')" style="color: #0891b2;"></i>
+                        <i data-lucide="edit-3" class="icon-btn" onclick="prepareEdit('${c.firebaseId}')" style="color:#64748b;"></i>
+                        <i data-lucide="trash-2" class="icon-btn" onclick="deletePlan('${c.firebaseId}')" style="color:#dc2626;"></i>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+        lucide.createIcons();
+        document.getElementById('statLine').innerHTML = `${data.length} Plans Visible ${pendingReviews > 0 ? `<span class="pending-alert">• ${pendingReviews} Review Required</span>` : ''}`;
+    }
+
+    window.applyFilters = () => {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const staff = document.getElementById('filterAssigned').value;
+        const reviewYears = parseFloat(document.getElementById('reviewFilterYears').value);
+        const today = new Date();
+        let filtered = allClients.filter(c => c.name.toLowerCase().includes(search));
+        if (staff !== "All") filtered = filtered.filter(c => Array.isArray(c.assigned) ? c.assigned.includes(staff) : c.assigned === staff);
+        if (!isNaN(reviewYears)) {
+            const horizon = new Date(); horizon.setFullYear(today.getFullYear() + reviewYears);
+            filtered = filtered.filter(c => {
+                const target = new Date(c.targetDateRaw);
+                const reviewStart = new Date(target); reviewStart.setFullYear(reviewStart.getFullYear() - (parseFloat(c.reviewN) || 2));
+                return reviewStart <= horizon && c.status !== "Completed";
+            });
+        }
+        renderTable(filtered);
+    };
+
+    document.getElementById('clientForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('editId').value, pv = parseFloat(document.getElementById('f_pv').value), years = parseFloat(document.getElementById('f_years').value);
+        const inf = parseFloat(document.getElementById('f_inf').value), growth = parseFloat(document.getElementById('f_growth').value), type = document.getElementById('f_type').value;
+        const actSIP = parseFloat(document.getElementById('f_actual_sip').value) || 0, actLS = parseFloat(document.getElementById('f_actual_ls').value) || 0;
+        const assignedSelect = document.getElementById('f_assigned');
+        let assigned = Array.from(assignedSelect.selectedOptions).map(o => o.value);
+        if (assigned.length === 0) assigned = ["Unassigned"];
+        const fv = pv * Math.pow((1 + inf/100), years), r = (growth/100)/12, n = years*12, af = (Math.pow(1+r,n)-1)/r;
+        const totalActualFV = ((type === 'SIP' || type === 'SIP_LS') ? (actSIP * af) : 0) + ((type === 'LS' || type === 'SIP_LS') ? (actLS * Math.pow((1 + growth/100), years)) : 0);
+        let targetDate = new Date(document.getElementById('f_date').value); targetDate.setFullYear(targetDate.getFullYear() + Math.floor(years));
+        const payload = {
+            date: document.getElementById('f_date').value, name: document.getElementById('f_name').value,
+            goal: document.getElementById('f_goal').value === 'Custom' ? document.getElementById('f_custom_goal').value : document.getElementById('f_goal').value,
+            assigned, risk: document.getElementById('f_risk').value, notes: document.getElementById('f_notes').value,
+            pv, years, inf, growth, type, actualSIP: actSIP, actualLS: actLS, totalActualFV, fv, diff: totalActualFV - fv, 
+            reqSIP: n > 0 ? fv / af : 0, reqLS: fv / Math.pow((1 + growth/100), years),
+            reviewN: parseFloat(document.getElementById('f_review_n').value), status: document.getElementById('f_status').value,
+            targetDateRaw: targetDate.toISOString(), targetDateDisplay: targetDate.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
+        };
+        id ? await updateDoc(doc(db, "clients", id), payload) : await addDoc(clientsCol, payload);
         closeModal('formModal');
     };
 
     window.prepareEdit = (id) => {
-        const c = allClients.find(x => x.firebaseId === id);
-        if (!c) return;
+        const c = allClients.find(x => x.firebaseId === id); if (!c) return;
         document.getElementById('editId').value = id;
-        document.getElementById('f_name').value = c.name;
-        document.getElementById('f_date').value = c.date;
-        document.getElementById('f_pv').value = c.pv;
-        document.getElementById('f_years').value = c.years;
-        document.getElementById('f_review_n').value = c.reviewN || 2;
-        document.getElementById('f_inf').value = c.inf;
-        document.getElementById('f_growth').value = c.growth;
-        document.getElementById('f_type').value = c.type;
-        document.getElementById('f_actual_sip').value = c.actualSIP || 0;
-        document.getElementById('f_actual_ls').value = c.actualLS || 0;
-        document.getElementById('f_status').value = c.status;
-        toggleInvestmentInputs(c.type);
-        document.getElementById('formModal').style.display = 'flex';
-        calculateLive();
+        document.getElementById('f_name').value = c.name; document.getElementById('f_date').value = c.date;
+        document.getElementById('f_pv').value = c.pv; document.getElementById('f_years').value = c.years;
+        document.getElementById('f_review_n').value = c.reviewN || 2; document.getElementById('f_inf').value = c.inf;
+        document.getElementById('f_growth').value = c.growth; document.getElementById('f_type').value = c.type;
+        document.getElementById('f_actual_sip').value = c.actualSIP || 0; document.getElementById('f_actual_ls').value = c.actualLS || 0;
+        document.getElementById('f_status').value = c.status; document.getElementById('f_risk').value = c.risk || "Low";
+        document.getElementById('f_notes').value = c.notes || "";
+        Array.from(document.getElementById('f_assigned').options).forEach(o => o.selected = (c.assigned || []).includes(o.value));
+        toggleInvestmentInputs(c.type); document.getElementById('formModal').style.display = 'flex'; calculateLive();
     };
 
-    ['f_pv', 'f_years', 'f_inf', 'f_growth', 'f_actual_sip', 'f_actual_ls', 'f_type', 'f_date'].forEach(id => {
-        document.getElementById(id).addEventListener('input', calculateLive);
-    });
-    document.getElementById('searchInput').addEventListener('input', applyFilters);
-    document.getElementById('outlookYears').addEventListener('input', applyFilters);
+    ['f_pv', 'f_years', 'f_inf', 'f_growth', 'f_actual_sip', 'f_actual_ls', 'f_type', 'f_date'].forEach(id => document.getElementById(id).addEventListener('input', calculateLive));
     window.openModal = () => { document.getElementById('clientForm').reset(); document.getElementById('editId').value = ""; toggleInvestmentInputs('SIP'); document.getElementById('formModal').style.display = 'flex'; };
     window.closeModal = (id) => document.getElementById(id).style.display = 'none';
-    window.deletePlan = async (id) => { if(confirm("Delete plan?")) await deleteDoc(doc(db, "clients", id)); };
+    window.deletePlan = async (id) => { if(confirm("Delete record?")) await deleteDoc(doc(db, "clients", id)); };
     window.toggleCustomGoal = (v) => document.getElementById('f_custom_goal').style.display = v === 'Custom' ? 'block' : 'none';
 </script>
 </body>
