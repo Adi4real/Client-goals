@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Goal Planner Dashboard - FideloWealth</title>
+    <title>FideloWealth | Financial Goal Planner</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -25,32 +25,35 @@
         }
 
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); margin: 0; padding: 20px; color: var(--text-main); }
-        .dashboard-container { max-width: 1600px; margin: 0 auto; background: var(--card-bg); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 24px; }
+        
+        /* Login Screen Styles */
+        #authScreen { position: fixed; inset: 0; background: #001f3f; display: flex; justify-content: center; align-items: center; z-index: 9999; }
+        .login-card { background: white; padding: 40px; border-radius: 12px; width: 360px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); text-align: center; }
+        .login-card h2 { margin-bottom: 24px; color: #001f3f; font-weight: 800; }
+        .login-group { margin-bottom: 15px; text-align: left; }
+        .login-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; }
+        .login-group input { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        .btn-login { width: 100%; background: var(--primary-blue); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+        .error-msg { color: #dc2626; font-size: 12px; margin-top: 10px; display: none; }
+
+        /* Dashboard Container */
+        .dashboard-container { max-width: 1600px; margin: 0 auto; background: var(--card-bg); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 24px; display: none; }
         
         .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; gap: 20px; }
         .brand-section { display: flex; align-items: center; gap: 30px; flex-grow: 1; }
-        
-        .company-logo { margin-top: -10px;width: 480px; height: 60px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .company-logo { width: 280px; height: 60px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .company-logo img { width: 100%; height: 100%; object-fit: contain; }
 
-        .stats { color: var(--text-muted); font-size: 13px; margin: 2px 0 0 0; }
-        
         @keyframes pulse-alert { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
-        .pending-alert { 
-            color: #f59e0b; font-weight: 700; background: #fffbeb; padding: 4px 10px; 
-            border-radius: 6px; border: 1px solid #fef3c7; margin-left: 10px; 
-            animation: pulse-alert 2s infinite; display: inline-flex; align-items: center; gap: 4px;
-        }
+        .pending-alert { color: #f59e0b; font-weight: 700; background: #fffbeb; padding: 4px 10px; border-radius: 6px; border: 1px solid #fef3c7; margin-left: 10px; animation: pulse-alert 2s infinite; display: inline-flex; align-items: center; gap: 4px; }
         
-        .btn-add { background: #003366; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; flex-shrink: 0; }
+        .btn-add { background: #003366; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
+        .btn-logout { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; }
 
         .search-controls { display: flex; gap: 12px; align-items: center; }
         .search-group { position: relative; display: flex; align-items: center; }
         .search-group input { padding: 10px 10px 10px 35px; border: 1px solid var(--border-color); border-radius: 8px; outline: none; font-size: 13px; background: #f8fafc; width: 180px; }
         .search-group i { position: absolute; left: 10px; width: 16px; color: var(--text-muted); }
-
-        .outlook-box { background: #f1f5f9; padding: 8px 12px; border-radius: 8px; display: flex; align-items: center; gap: 8px; font-size: 13px; border: 1px solid var(--border-color); }
-        .outlook-box input { width: 40px; border: 1px solid var(--border-color); border-radius: 4px; padding: 2px 5px; text-align: center; font-weight: 600; }
 
         .table-wrapper { overflow-x: auto; margin-top: 20px; }
         table { width: 100%; border-collapse: collapse; font-size: 11px; white-space: nowrap; }
@@ -58,14 +61,7 @@
         td { padding: 12px 8px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
         
         .hover-cell { font-weight: 700; color: #475569; position: relative; cursor: help; border-bottom: 1px dotted #cbd5e1; }
-        .hover-cell:hover::after {
-            content: attr(data-tooltip);
-            position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%);
-            background: #1e293b; color: white; padding: 8px 12px; border-radius: 6px;
-            font-size: 10px; white-space: pre; z-index: 10; pointer-events: none;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            line-height: 1.4;
-        }
+        .hover-cell:hover::after { content: attr(data-tooltip); position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 8px 12px; border-radius: 6px; font-size: 10px; white-space: pre; z-index: 10; pointer-events: none; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); line-height: 1.4; }
 
         .status-pill { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
         .Active { background: var(--status-active-bg); color: var(--status-active-text); }
@@ -76,7 +72,7 @@
         .deficit { color: #dc2626; font-weight: 700; }
         .surplus { color: #16a34a; font-weight: 700; }
 
-        /* Modal Styles */
+        /* Modal & Calc UI */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px); }
         .modal-card { background: white; border-radius: 12px; width: 850px; padding: 30px; max-height: 90vh; overflow-y: auto; }
         .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
@@ -84,23 +80,11 @@
         .form-group label { font-size: 11px; font-weight: 700; color: var(--text-muted); }
         .form-group input, .form-group select { padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: #f8fafc; font-size: 13px; }
         
-        /* Requirement Box Styling */
         .req-box { grid-column: span 3; border-radius: 8px; padding: 18px; margin-top: 10px; border: 1px solid #e2e8f0; }
         .solo-path { background: #fffbeb; border-color: #fef3c7; }
         .inter-path { background: #f0f9ff; border-color: #e0f2fe; }
-        
         .req-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 15px; align-items: center; }
-        
-        /* Amount Display Box (Increased Padding) */
-        .amt-box { 
-            font-weight: 700; 
-            color: #0369a1; 
-            background: #e0f2fe; 
-            padding: 10px 14px; 
-            border-radius: 6px; 
-            font-size: 16px;
-            min-width: 140px;
-        }
+        .amt-box { font-weight: 700; color: #0369a1; background: #e0f2fe; padding: 10px 14px; border-radius: 6px; font-size: 16px; min-width: 140px; }
 
         .modal-calc-footer { background: #f1f5f9; padding: 20px; border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 13px; border: 1px solid var(--border-color); }
         .modal-calc-footer div { display: flex; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding: 5px 0; }
@@ -111,7 +95,27 @@
 </head>
 <body>
 
-    <div class="dashboard-container">
+    <div id="authScreen">
+        <div class="login-card">
+            <h2>Employee Access</h2>
+            <div class="login-group">
+                <label>Employee ID</label>
+                <input type="text" id="loginId" placeholder="e.g. FW-001">
+            </div>
+            <div class="login-group">
+                <label>Password</label>
+                <input type="password" id="loginPass" placeholder="••••••••">
+            </div>
+            <div class="login-group">
+                <label>Verification Code (OTP)</label>
+                <input type="text" id="loginOtp" placeholder="Enter 6-digit token">
+            </div>
+            <button class="btn-login" onclick="handleLogin()">Sign In to Dashboard</button>
+            <p id="authError" class="error-msg">Invalid Credentials or Verification Code.</p>
+        </div>
+    </div>
+
+    <div class="dashboard-container" id="mainDashboard">
         <header class="dashboard-header">
             <div class="brand-section">
                 <div>
@@ -126,15 +130,14 @@
             <div class="search-controls">
                 <div class="outlook-box">
                     <i data-lucide="calendar-clock" style="width:16px;"></i>
-                    <span>Maturity in</span>
-                    <input type="number" id="outlookYears" placeholder="Yrs" min="1">
-                    <span>years</span>
+                    <input type="number" id="outlookYears" placeholder="Yrs" min="1" style="width:40px; border:none; background:transparent; font-weight:700;">
                 </div>
                 <div class="search-group">
                     <i data-lucide="search"></i>
                     <input type="text" id="searchInput" placeholder="Search client...">
                 </div>
                 <button class="btn-add" onclick="openModal()"><i data-lucide="plus"></i> Create Plan</button>
+                <button class="btn-logout" onclick="handleLogout()">Logout</button>
             </div>
         </header>
 
@@ -143,8 +146,7 @@
                 <thead>
                     <tr>
                         <th>#</th><th>PLAN DATE</th><th>NAME</th><th>GOAL</th><th>TYPE</th><th>PV COST</th><th>TERM</th>
-                        <th>INF (%)</th><th>GRW (%)</th>
-                        <th style="color:var(--primary-blue);">TARGET FV</th><th>TARGET DATE</th><th>REQ. INV</th><th>ACTUAL INV</th><th>GAP (FV)</th><th>STATUS</th><th>ACTIONS</th>
+                        <th>INF (%)</th><th>GRW (%)</th><th style="color:var(--primary-blue);">TARGET FV</th><th>TARGET DATE</th><th>REQ. INV</th><th>ACTUAL INV</th><th>GAP (FV)</th><th>STATUS</th><th>ACTIONS</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody"></tbody>
@@ -155,7 +157,7 @@
     <div class="modal-overlay" id="formModal">
         <div class="modal-card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
-                <h2 id="modalTitle" style="margin:0; font-size:20px; font-weight: 700;">Financial Goal Sheet</h2>
+                <h2 style="margin:0; font-size:20px; font-weight: 700;">Financial Goal Sheet</h2>
                 <button onclick="closeModal('formModal')" style="background:none; border:none; cursor:pointer; font-size:32px; color:#94a3b8;">&times;</button>
             </div>
             <form id="clientForm">
@@ -166,26 +168,21 @@
                     <div class="form-group">
                         <label>Goal</label>
                         <select id="f_goal" onchange="toggleCustomGoal(this.value)">
-                            <option>Children Marriage</option><option>UG Education</option><option>PG Education</option>
-                            <option>Home Purchase</option><option>Retirement</option><option value="Custom">Custom...</option>
+                            <option>Child Marriage</option><option>UG Education</option><option>PG Education</option><option>Home Purchase</option><option>Retirement</option><option value="Custom">Custom...</option>
                         </select>
                         <input type="text" id="f_custom_goal" placeholder="Specify goal" style="display:none; margin-top:8px;">
                     </div>
                     <div class="form-group"><label>Present Cost (₹)</label><input type="number" id="f_pv" value="1000000"></div>
                     <div class="form-group"><label>Years to save (n)</label><input type="number" id="f_years" value="10"></div>
-                    <div class="form-group"><label>Review Window (Yrs)</label><input type="number" id=  "f_review_n" value="2"></div>
+                    <div class="form-group"><label>Review Window (Yrs)</label><input type="number" id="f_review_n" value="2"></div>
                     <div class="form-group"><label>Inflation (%)</label><input type="number" id="f_inf" value="6"></div>
                     <div class="form-group"><label>Growth (%)</label><input type="number" id="f_growth" value="12"></div>
-                    
                     <div class="form-group">
                         <label>Investment Type</label>
                         <select id="f_type" onchange="toggleInvestmentInputs(this.value)">
-                            <option value="SIP">Monthly SIP</option>
-                            <option value="LS">Lump Sum</option>
-                            <option value="SIP_LS">SIP + Lump Sum</option>
+                            <option value="SIP">Monthly SIP</option><option value="LS">Lump Sum</option><option value="SIP_LS">SIP + Lump Sum</option>
                         </select>
                     </div>
-
                     <div class="form-group" id="container_sip"><label>Actual Monthly SIP (₹)</label><input type="number" id="f_actual_sip" value="0"></div>
                     <div class="form-group" id="container_ls" style="display:none;"><label>Actual Lump Sum (₹)</label><input type="number" id="f_actual_ls" value="0"></div>
 
@@ -199,29 +196,14 @@
 
                     <div class="req-box inter-path">
                         <h4 style="margin: 0 0 5px 0; font-size: 11px; text-transform: uppercase; color: #0284c7;">Remaining Deficit Coverage</h4>
-                        <p style="font-size: 9px; color: var(--text-muted); margin: 0 0 12px 0;">To reach your goal from here, you need:</p>
                         <div class="req-grid">
-                            <div>
-                                <label style="font-size: 10px; color: var(--text-muted); display: block; margin-bottom: 4px;">Additional Monthly SIP:</label>
-                                <div id="display_inter_sip" class="amt-box">₹0</div>
-                            </div>
+                            <div><label style="font-size: 10px; color: var(--text-muted);">Additional Monthly SIP:</label><div id="display_inter_sip" class="amt-box">₹0</div></div>
                             <div style="font-weight: 800; color: #94a3b8; font-size: 12px; padding: 0 10px;">OR</div>
-                            <div>
-                                <label style="font-size: 10px; color: var(--text-muted); display: block; margin-bottom: 4px;">Additional Lump Sum:</label>
-                                <div id="display_inter_ls" class="amt-box">₹0</div>
-                            </div>
+                            <div><label style="font-size: 10px; color: var(--text-muted);">Additional Lump Sum:</label><div id="display_inter_ls" class="amt-box">₹0</div></div>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>Current Status</label>
-                        <select id="f_status">
-                            <option value="Active">Active</option>
-                            <option value="Under-Review">Under Review</option>
-                            <option value="Paused">Paused</option>
-                            <option value="Completed">Completed</option>
-                        </select>
-                    </div>
+                    <div class="form-group"><label>Current Status</label><select id="f_status"><option value="Active">Active</option><option value="Under-Review">Under Review</option><option value="Paused">Paused</option><option value="Completed">Completed</option></select></div>
                 </div>
                 <div class="modal-calc-footer">
                     <div>Future Goal Cost: <strong id="c_fv">₹0</strong></div>
@@ -231,7 +213,7 @@
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn-cancel" onclick="closeModal('formModal')">Cancel</button>
-                    <button type="submit" class="btn-submit" id="submitBtn">Save Planning Data</button>
+                    <button type="submit" class="btn-submit">Save Planning Data</button>
                 </div>
             </form>
         </div>
@@ -253,9 +235,48 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const clientsCol = collection(db, "clients");
-
     let allClients = [];
 
+    // --- AUTHENTICATION LOGIC ---
+    const VALID_USER = "FW-EMPLOYEE";
+    const VALID_PASS = "Fidelo2026";
+    const MASTER_OTP = "123456"; // Your static security token
+
+    window.handleLogin = () => {
+        const id = document.getElementById('loginId').value;
+        const pass = document.getElementById('loginPass').value;
+        const otp = document.getElementById('loginOtp').value;
+        
+        if (id === VALID_USER && pass === VALID_PASS && otp === MASTER_OTP) {
+            sessionStorage.setItem('isLoggedIn', 'true');
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('mainDashboard').style.display = 'block';
+            initApp();
+        } else {
+            document.getElementById('authError').style.display = 'block';
+        }
+    };
+
+    window.handleLogout = () => {
+        sessionStorage.removeItem('isLoggedIn');
+        location.reload();
+    };
+
+    // Check session on load
+    if (sessionStorage.getItem('isLoggedIn') === 'true') {
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('mainDashboard').style.display = 'block';
+        initApp();
+    }
+
+    function initApp() {
+        onSnapshot(clientsCol, (snapshot) => {
+            allClients = snapshot.docs.map(doc => ({ firebaseId: doc.id, ...doc.data() }));
+            applyFilters();
+        });
+    }
+
+    // --- CALCULATOR & DASHBOARD LOGIC ---
     window.toggleInvestmentInputs = (type) => {
         document.getElementById('container_sip').style.display = (type === 'SIP' || type === 'SIP_LS') ? 'flex' : 'none';
         document.getElementById('container_ls').style.display = (type === 'LS' || type === 'SIP_LS') ? 'flex' : 'none';
@@ -276,20 +297,20 @@
 
         const r = growth / 12;
         const n = years * 12;
+        const annuityFactor = (Math.pow(1 + r, n) - 1) / r;
 
-        // Solo Path Benchmarks
-        const soloReqSIP = n > 0 ? goalFV / (((Math.pow(1 + r, n) - 1) / r) * (1 + r)) : 0;
+        const soloReqSIP = n > 0 ? goalFV / annuityFactor : 0;
         const soloReqLS = goalFV / Math.pow((1 + growth), years);
+
         document.getElementById('display_req_sip').innerText = '₹' + Math.round(soloReqSIP).toLocaleString('en-IN');
         document.getElementById('display_req_ls').innerText = '₹' + Math.round(soloReqLS).toLocaleString('en-IN');
         
-        // Deficit Logic (Current vs Target)
-        const curSIP_FV = (type === 'SIP' || type === 'SIP_LS') ? (actSIP * (((Math.pow(1 + r, n) - 1) / r) * (1 + r))) : 0;
+        const curSIP_FV = (type === 'SIP' || type === 'SIP_LS') ? (actSIP * annuityFactor) : 0;
         const curLS_FV = (type === 'LS' || type === 'SIP_LS') ? (actLS * Math.pow((1 + growth), years)) : 0;
         const totalActualFV = curSIP_FV + curLS_FV;
 
         const fvGap = Math.max(0, goalFV - totalActualFV);
-        const addSIP = n > 0 ? fvGap / (((Math.pow(1 + r, n) - 1) / r) * (1 + r)) : 0;
+        const addSIP = n > 0 ? fvGap / annuityFactor : 0;
         const addLS = fvGap / Math.pow((1 + growth), years);
 
         document.getElementById('display_inter_sip').innerText = '₹' + Math.round(addSIP).toLocaleString('en-IN');
@@ -327,63 +348,23 @@
             const status = c.status || "Active";
             const thresholdDate = new Date(targetDate);
             thresholdDate.setFullYear(thresholdDate.getFullYear() - (parseFloat(c.reviewN) || 2));
-            
             const isInsideReviewWindow = today >= thresholdDate && today <= targetDate && status !== "Completed";
             const displayStatus = isInsideReviewWindow ? "Under-Review" : status;
             if (isInsideReviewWindow) reviewCount++;
-            
             const rowStyle = isInsideReviewWindow ? 'style="background-color: #fffbeb;"' : '';
             
-            let actContent = "";
-            if (c.type === 'SIP_LS') {
-                actContent = `
-                    <div style="line-height:1.4;">
-                        <div>₹${Number(c.actualSIP).toLocaleString()}/mo SIP</div>
-                        <div style="color:var(--text-muted); font-size:9px;">₹${Number(c.actualLS).toLocaleString()} LS</div>
-                    </div>`;
-            } else if (c.type === 'SIP') {
-                actContent = `₹${Number(c.actualSIP).toLocaleString()}/mo SIP`;
-            } else {
-                actContent = `₹${Number(c.actualLS).toLocaleString()} LS`;
-            }
-
-            const reqTT = `Solo Benchmarks:\nReq. SIP: ₹${Math.round(c.reqSIP).toLocaleString()}\nReq. LS: ₹${Math.round(c.reqLS).toLocaleString()}`;
-            const reqVal = c.type === 'SIP' ? c.reqSIP : (c.type === 'LS' ? c.reqLS : "Mixed (Hover)");
+            let actContent = c.type === 'SIP_LS' ? `<div style="line-height:1.4;"><div>₹${Number(c.actualSIP).toLocaleString()}/mo SIP</div><div style="color:var(--text-muted); font-size:9px;">₹${Number(c.actualLS).toLocaleString()} LS</div></div>` : (c.type === 'SIP' ? `₹${Number(c.actualSIP).toLocaleString()}/mo SIP` : `₹${Number(c.actualLS).toLocaleString()} LS`);
+            let reqContent = c.type === 'SIP_LS' ? `<div class="hover-cell" data-tooltip="Standalone Path:\nSIP: ₹${Math.round(c.reqSIP).toLocaleString()}\nLS: ₹${Math.round(c.reqLS).toLocaleString()}" style="line-height:1.4;"><div>₹${Math.round(c.reqSIP).toLocaleString()}/mo SIP</div><div style="color:var(--text-muted); font-size:9px;">₹${Math.round(c.reqLS).toLocaleString()} LS</div></div>` : `₹${Math.round(c.type === 'SIP' ? c.reqSIP : c.reqLS).toLocaleString()}${c.type === 'SIP' ? "/mo SIP" : " LS"}`;
 
             return `
             <tr ${rowStyle}>
-                <td>${index + 1}</td>
-                <td>${c.date}</td>
-                <td>${c.name}</td>
-                <td>${c.goal}</td>
-                <td>${c.type === 'SIP_LS' ? 'SIP + LS' : c.type}</td>
-                <td>₹${Number(c.pv).toLocaleString()}</td>
-                <td>${c.years} yrs</td>
-                <td>${c.inf}%</td>
-                <td>${c.growth}%</td>
-                <td><strong>₹${Math.round(c.fv).toLocaleString()}</strong></td>
-                <td>${c.targetDateDisplay}</td>
-                <td><span class="${c.type === 'SIP_LS' ? 'hover-cell' : ''}" data-tooltip="${reqTT}">${typeof reqVal === 'number' ? '₹' + Math.round(reqVal).toLocaleString() : reqVal}</span></td>
-                <td style="font-weight: 500;">${actContent}</td>
-                <td class="${c.diff >= 0 ? 'surplus' : 'deficit'}">${Math.abs(Math.round(c.diff)).toLocaleString()}</td>
-                <td><span class="status-pill ${displayStatus}">${displayStatus.replace('-', ' ')}</span></td>
-                <td>
-                    <div style="display:flex; gap:8px;">
-                        <i data-lucide="edit-3" onclick="prepareEdit('${c.firebaseId}')" style="cursor:pointer; width:14px; color:#64748b;"></i>
-                        <i data-lucide="trash-2" onclick="deletePlan('${c.firebaseId}')" style="cursor:pointer; width:14px; color:#dc2626;"></i>
-                    </div>
-                </td>
+                <td>${index + 1}</td><td>${c.date}</td><td>${c.name}</td><td>${c.goal}</td><td>${c.type === 'SIP_LS' ? 'SIP + LS' : c.type}</td><td>₹${Number(c.pv).toLocaleString()}</td><td>${c.years} yrs</td><td>${c.inf}%</td><td>${c.growth}%</td><td><strong>₹${Math.round(c.fv).toLocaleString()}</strong></td><td>${c.targetDateDisplay}</td><td>${reqContent}</td><td style="font-weight: 500;">${actContent}</td><td class="${c.diff >= 0 ? 'surplus' : 'deficit'}">${Math.abs(Math.round(c.diff)).toLocaleString()}</td><td><span class="status-pill ${displayStatus}">${displayStatus.replace('-', ' ')}</span></td><td><div style="display:flex; gap:8px;"><i data-lucide="edit-3" onclick="prepareEdit('${c.firebaseId}')" style="cursor:pointer; width:14px; color:#64748b;"></i><i data-lucide="trash-2" onclick="deletePlan('${c.firebaseId}')" style="cursor:pointer; width:14px; color:#dc2626;"></i></div></td>
             </tr>`;
         }).join('');
         
         lucide.createIcons();
         document.getElementById('statLine').innerHTML = `${data.length} Plans Visible ${reviewCount > 0 ? `<span class="pending-alert">• ${reviewCount} Reviews Pending</span>` : ''}`;
     }
-
-    onSnapshot(clientsCol, (snapshot) => {
-        allClients = snapshot.docs.map(doc => ({ firebaseId: doc.id, ...doc.data() }));
-        applyFilters();
-    });
 
     function applyFilters() {
         const searchTerm = document.getElementById('searchInput').value.toLowerCase();
@@ -407,10 +388,8 @@
 
         const fv = pv * Math.pow((1 + inf/100), years);
         const r = (growth/100) / 12, n = years * 12;
-        
-        const sipFV = (type === 'SIP' || type === 'SIP_LS') ? actSIP * (((Math.pow(1 + r, n) - 1) / r) * (1 + r)) : 0;
-        const lsFV = (type === 'LS' || type === 'SIP_LS') ? actLS * Math.pow((1 + growth/100), years) : 0;
-        const totalActualFV = sipFV + lsFV;
+        const annuityFactor = (Math.pow(1 + r, n) - 1) / r;
+        const totalActualFV = (actSIP * annuityFactor) + (actLS * Math.pow((1 + growth/100), years));
 
         let targetDate = new Date(document.getElementById('f_date').value);
         targetDate.setFullYear(targetDate.getFullYear() + Math.floor(years));
@@ -419,9 +398,8 @@
             date: document.getElementById('f_date').value,
             name: document.getElementById('f_name').value,
             goal: document.getElementById('f_goal').value === 'Custom' ? document.getElementById('f_custom_goal').value : document.getElementById('f_goal').value,
-            pv, years, inf, growth, type, actualSIP: actSIP, actualLS: actLS, totalActualFV: totalActualFV, fv, diff: totalActualFV - fv, 
-            reqSIP: n > 0 ? fv / (((Math.pow(1 + r, n) - 1) / r) * (1 + r)) : 0, 
-            reqLS: fv / Math.pow((1 + growth/100), years),
+            pv, years, inf, growth, type, actualSIP: actSIP, actualLS: actLS, totalActualFV, fv, diff: totalActualFV - fv, 
+            reqSIP: n > 0 ? fv / annuityFactor : 0, reqLS: fv / Math.pow((1 + growth/100), years),
             reviewN: parseFloat(document.getElementById('f_review_n').value), status: document.getElementById('f_status').value,
             targetDateRaw: targetDate.toISOString(), targetDateDisplay: targetDate.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
         };
