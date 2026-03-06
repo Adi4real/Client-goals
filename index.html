@@ -44,37 +44,40 @@
 
         .dashboard-container { max-width: 100%; margin: 0 auto; background: var(--card-bg); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 24px; display: none; box-sizing: border-box; }
         
-        /* REORGANIZED HEADER CSS */
+        /* REORGANIZED HEADER */
         .dashboard-header { display: flex; flex-direction: column; gap: 20px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 24px; }
         .header-top-row { display: flex; justify-content: space-between; align-items: center; }
-        .header-bottom-row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+        .header-bottom-row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); }
         
         .brand-section { display: flex; align-items: center; gap: 20px; }
         .company-logo { height: 50px; display: flex; align-items: center; }
         .company-logo img { height: 100%; object-fit: contain; }
 
-        @keyframes pulse-alert { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
-        .pending-alert { color: #f59e0b; font-weight: 700; background: #fffbeb; padding: 6px 12px; border-radius: 8px; border: 1px solid #fef3c7; animation: pulse-alert 2s infinite; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; }
-        
-        .btn-add { background: var(--primary-blue); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; transition: all 0.2s; }
-        .btn-export { background: #16a34a; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; transition: all 0.2s; }
-        .btn-logout { background: white; color: #475569; border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; }
-        .btn-logout:hover { background: #fee2e2; color: #dc2626; border-color: #fecaca; }
+        .title-area { border-left: 2px solid var(--border-color); padding-left: 20px; }
+        .title-area h1 { font-size: 18px; margin: 0; font-weight: 800; color: #001f3f; }
+        .stats-line { display: flex; align-items: center; gap: 12px; margin-top: 4px; font-size: 12px; font-weight: 600; color: var(--text-muted); }
 
-        .search-group { position: relative; display: flex; align-items: center; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; }
-        .search-group input, .search-group select { padding: 12px 12px 12px 40px; border: none; outline: none; font-size: 14px; background: transparent; min-width: 180px; }
+        @keyframes pulse-alert { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+        .pending-alert { color: #f59e0b; font-weight: 700; background: #fffbeb; padding: 5px 12px; border-radius: 8px; border: 1px solid #fef3c7; animation: pulse-alert 2s infinite; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
+        
+        .btn-add { background: var(--primary-blue); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; }
+        .btn-export { background: #16a34a; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; }
+        .btn-logout { background: white; color: #475569; border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; }
+
+        .search-group { position: relative; display: flex; align-items: center; background: white; border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; height: 46px; }
+        .search-group input, .search-group select { padding: 0 12px 0 40px; border: none; outline: none; font-size: 14px; background: transparent; min-width: 180px; height: 100%; }
         .search-group i { position: absolute; left: 14px; width: 18px; color: var(--text-muted); z-index: 1; }
 
-        .review-outlook-box { background: #fff; border: 1px solid var(--border-color); border-radius: 10px; display: flex; align-items: center; padding: 0 15px; height: 46px; }
-        .review-outlook-box label { font-size: 10px; font-weight: 800; color: #d97706; margin-right: 8px; text-transform: uppercase; }
+        .review-horizon-box { background: #fff; border: 1px solid var(--border-color); border-radius: 10px; display: flex; align-items: center; padding: 0 15px; height: 46px; }
+        .review-horizon-box label { font-size: 10px; font-weight: 800; color: #d97706; margin-right: 8px; text-transform: uppercase; }
 
         .table-wrapper { width: 100%; overflow-x: auto; border: 1px solid var(--border-color); border-radius: 12px; }
         table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
         th { padding: 14px 10px; color: #64748b; text-align: center; border-bottom: 1px solid var(--border-color); font-weight: 700; background: #f8fafc; text-transform: uppercase; }
         td { padding: 14px 10px; border-bottom: 1px solid var(--border-color); text-align: center; }
         
-        .hover-cell { font-weight: 700; color: #1e293b; cursor: help; border-bottom: 1px dotted #cbd5e1; }
-        .hover-cell:hover::after { content: attr(data-tooltip); position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 10px 14px; border-radius: 8px; font-size: 11px; white-space: pre-wrap; z-index: 100; pointer-events: none; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4); line-height: 1.5; width: 220px; text-align: left; }
+        .hover-cell { font-weight: 700; color: #1e293b; position: relative; cursor: help; border-bottom: 1px dotted #cbd5e1; }
+        .hover-cell:hover::after { content: attr(data-tooltip); position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 10px 14px; border-radius: 8px; font-size: 11px; white-space: pre-wrap; z-index: 100; pointer-events: none; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4); line-height: 1.5; width: 220px; text-align: left; }
 
         .status-pill { padding: 5px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
         .Active { background: var(--status-active-bg); color: var(--status-active-text); }
@@ -104,7 +107,23 @@
         .search-select-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border-color); max-height: 200px; overflow-y: auto; z-index: 10; display: none; border-radius: 8px; }
         .search-select-option { padding: 10px 12px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f1f5f9; }
 
-        .fund-selection-box { background: #f0f7ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 16px; margin-top: 8px; }
+       /* Forces the investment containers to take full width of the grid */
+.fund-selection-box { 
+    background: #f0f7ff; 
+    border: 1px solid #bfdbfe; 
+    border-radius: 12px; 
+    padding: 16px; 
+    margin-top: 8px;
+    grid-column: span 2; /* This makes it full width */
+}
+
+/* Internal grid for the SIP/LS inputs to keep labels and inputs organized */
+.fund-input-row {
+    display: grid; 
+    grid-template-columns: 1fr 2fr; 
+    gap: 15px;
+    width: 100%;
+}
         .req-box { grid-column: span 1; border-radius: 10px; padding: 16px; border: 1px solid #e2e8f0; }
         .solo-path { background: #fffbeb; border-color: #fef3c7; }
         .inter-path { background: #f0f9ff; border-color: #e0f2fe; }
@@ -123,18 +142,9 @@
     <div id="authScreen">
         <div class="login-card">
             <h2>Employee Access</h2>
-            <div class="login-group">
-                <label>Employee ID</label>
-                <input type="text" id="loginId" placeholder="e.g. FW-001">
-            </div>
-            <div class="login-group">
-                <label>Password</label>
-                <input type="password" id="loginPass" placeholder="••••••••">
-            </div>
-            <div class="login-group">
-                <label>Verification code</label>
-                <input type="text" id="loginOtp" placeholder="Enter 6-digit token">
-            </div>
+            <div class="login-group"><label>Employee ID</label><input type="text" id="loginId" placeholder="e.g. FW-001"></div>
+            <div class="login-group"><label>Password</label><input type="password" id="loginPass" placeholder="••••••••"></div>
+            <div class="login-group"><label>Verification code</label><input type="text" id="loginOtp" placeholder="Enter 6-digit token"></div>
             <button class="btn-login" onclick="handleLogin()">Sign In</button>
             <p id="authError" class="error-msg">Invalid Credentials.</p>
         </div>
@@ -144,13 +154,11 @@
         <header class="dashboard-header">
             <div class="header-top-row">
                 <div class="brand-section">
-                    <div class="company-logo">
-                        <img src="logo.png" alt="FideloWealth Logo" id="logoImg">
-                    </div>
-                    <div style="border-left: 2px solid var(--border-color); padding-left: 20px;">
-                        <h1 style="font-size: 18px; margin: 0; font-weight: 800; color: #001f3f;">Financial Goal Planner</h1>
-                        <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px;">
-                            <p id="statLine" style="margin: 0; font-size: 13px; font-weight: 600; color: #64748b;">8 Plans Visible</p>
+                    <div class="company-logo"><img src="logo.png" alt="FideloWealth Logo" id="logoImg"></div>
+                    <div class="title-area">
+                        <h1>Financial Goal Planner</h1>
+                        <div class="stats-line">
+                            <span id="statLine">8 Plans Visible</span>
                             <button class="btn-logout" onclick="handleLogout()">Logout</button>
                         </div>
                     </div>
@@ -159,10 +167,10 @@
             </div>
 
             <div class="header-bottom-row">
-                <div class="review-outlook-box">
-                    <i data-lucide="calendar-clock" style="width:16px; color:#d97706; margin-right: 8px;"></i>
+                <div class="review-horizon-box">
+                    <i data-lucide="calendar-clock" style="width:16px; color:#d97706;"></i>
                     <label>Review In</label>
-                    <input type="number" id="reviewFilterYears" placeholder="N" style="width: 35px; border:none; background:transparent; font-weight:700; font-size:14px;" oninput="applyFilters()">
+                    <input type="number" id="reviewFilterYears" placeholder="N" style="width:35px; border:none; background:transparent; font-weight:700;" oninput="applyFilters()">
                     <span style="font-size:10px; font-weight:800; color:#d97706;">YRS</span>
                 </div>
 
@@ -179,12 +187,8 @@
                     <input type="text" id="searchInput" placeholder="Search client name..." style="width: 100%;" oninput="applyFilters()">
                 </div>
 
-                <button class="btn-export" onclick="exportToExcel()">
-                    <i data-lucide="file-spreadsheet"></i> Excel
-                </button>
-                <button class="btn-add" onclick="openModal()">
-                    <i data-lucide="plus"></i> New Plan
-                </button>
+                <button class="btn-export" onclick="exportToExcel()"><i data-lucide="file-spreadsheet" style="width:18px;"></i> Excel</button>
+                <button class="btn-add" onclick="openModal()"><i data-lucide="plus" style="width:18px;"></i> New Plan</button>
             </div>
         </header>
 
@@ -238,40 +242,50 @@
                 </div>
 
                 <div class="form-section-title">3. Deployment Strategy</div>
-                <div class="form-grid">
-                    <div class="form-group full-width">
-                        <label>Investment Mode</label>
-                        <select id="f_type" onchange="toggleInvestmentInputs(this.value)">
-                            <option value="SIP">Monthly SIP Only</option><option value="LS">Lump Sum Only</option><option value="SIP_LS">SIP + Lump Sum Hybrid</option>
-                        </select>
-                    </div>
+<div class="form-grid">
+    <div class="form-group full-width">
+        <label>Investment Mode</label>
+        <select id="f_type" onchange="toggleInvestmentInputs(this.value)">
+            <option value="SIP">Monthly SIP Only</option>
+            <option value="LS">Lump Sum Only</option>
+            <option value="SIP_LS">SIP + Lump Sum Hybrid</option>
+        </select>
+    </div>
 
-                    <div id="container_sip_all" class="form-group full-width fund-selection-box" style="display: block;">
-                        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px;">
-                            <div class="form-group"><label>Monthly SIP (₹)</label><input type="number" id="f_actual_sip" value="0"></div>
-                            <div class="form-group"><label>SIP Fund Allocation</label>
-                                <div class="search-select-container">
-                                    <input type="text" class="search-select-input" id="sip_fund_search" placeholder="Search SIP Fund..." autocomplete="off">
-                                    <div class="search-select-dropdown" id="sip_fund_dropdown"></div>
-                                    <input type="hidden" id="f_sip_fund" value="None">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="container_ls_all" class="form-group full-width fund-selection-box" style="display: none;">
-                        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px;">
-                            <div class="form-group"><label>Lump Sum (₹)</label><input type="number" id="f_actual_ls" value="0"></div>
-                            <div class="form-group"><label>LS Fund Allocation</label>
-                                <div class="search-select-container">
-                                    <input type="text" class="search-select-input" id="ls_fund_search" placeholder="Search LS Fund..." autocomplete="off">
-                                    <div class="search-select-dropdown" id="ls_fund_dropdown"></div>
-                                    <input type="hidden" id="f_ls_fund" value="None">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+    <div id="container_sip_all" class="fund-selection-box" style="display: block;">
+        <div class="fund-input-row">
+            <div class="form-group">
+                <label>Monthly SIP (₹)</label>
+                <input type="number" id="f_actual_sip" value="0">
+            </div>
+            <div class="form-group">
+                <label>SIP Fund Allocation</label>
+                <div class="search-select-container">
+                    <input type="text" class="search-select-input" id="sip_fund_search" placeholder="Search SIP Fund..." autocomplete="off">
+                    <div class="search-select-dropdown" id="sip_fund_dropdown"></div>
+                    <input type="hidden" id="f_sip_fund" value="None">
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="container_ls_all" class="fund-selection-box" style="display: none;">
+        <div class="fund-input-row">
+            <div class="form-group">
+                <label>Lump Sum (₹)</label>
+                <input type="number" id="f_actual_ls" value="0">
+            </div>
+            <div class="form-group">
+                <label>LS Fund Allocation</label>
+                <div class="search-select-container">
+                    <input type="text" class="search-select-input" id="ls_fund_search" placeholder="Search LS Fund..." autocomplete="off">
+                    <div class="search-select-dropdown" id="ls_fund_dropdown"></div>
+                    <input type="hidden" id="f_ls_fund" value="None">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
                 <div class="form-section-title">4. Gap Analysis & Requirements</div>
                 <div class="form-grid">
@@ -295,7 +309,7 @@
                 <div class="form-grid">
                     <div class="form-group"><label>Risk Appetite</label><select id="f_risk"><option value="Low">Low Risk</option><option value="Medium">Medium Risk</option><option value="High">High Risk</option></select></div>
                     <div class="form-group"><label>Status</label><select id="f_status"><option value="Active">Active</option><option value="Under-Review">Under Review</option><option value="Paused">Paused</option><option value="Completed">Completed</option></select></div>
-                    <div class="form-group full-width"><label>Admin Notes (Dashboard Only)</label><textarea id="f_notes" placeholder="Internal remarks..." style="height: 50px;"></textarea></div>
+                    <div class="form-group full-width"><label>Admin Notes</label><textarea id="f_notes" placeholder="Internal remarks..." style="height: 50px;"></textarea></div>
                 </div>
 
                 <div class="modal-calc-footer">
@@ -331,7 +345,6 @@
     const clientsCol = collection(db, "clients");
     let allClients = [];
 
-    // FUND OPTIONS LIST
     const FUND_OPTIONS = ["None", "Aditya Birla Sun Life Banking and Financial Services Fund Growth", "Aditya Birla Sun Life Flexi Cap Fund Growth", "Aditya Birla Sun Life Low Duration Fund Growth", "Aditya Birla Sun Life MNC Fund Growth", "Aditya Birla Sun Life Multi Asset Allocation Fund Growth", "Aditya Birla Sun Life Value Fund Growth", "Altiva Hybrid Long Growth", "Axis Balanced Advantage Fund Growth", "Axis Business Cycles Fund Growth", "Axis Consumption Fund Growth", "Axis ELSS Tax Saver Fund Growth", "Axis Flexi Cap Fund Growth", "Axis Focused Fund Growth", "Axis India Manufacturing Fund Growth", "Axis Large and Mid Cap Fund Growth", "Axis Midcap Fund Growth", "Axis Multicap Fund Growth", "Axis Small Cap Fund Growth", "Bandhan Arbitrage Fund Growth", "Bandhan Business Cycle Fund Growth", "Bandhan Corporate Bond Fund Growth", "Bandhan Crisil IBX 90:10 SDL Plus Gilt April 2032 Index Fund Growth", "Bandhan Crisil IBX Gilt April 2032 Index Fund Growth", "Bandhan ELSS Tax Saver Fund Growth", "Bandhan Financial Services Fund Growth", "Bandhan Flexi Cap Fund Growth", "Bandhan Focused Fund Growth", "Bandhan Income Plus Arbitrage Active FOF Growth", "Bandhan Infrastructure Fund Growth", "Bandhan Large and Mid Cap Fund Growth", "Bandhan Midcap Fund Growth", "Bandhan Money Market Fund Growth", "Bandhan Multi Asset Allocation Fund Growth", "Bandhan Small Cap Fund Growth", "Bandhan Value Fund Growth", "Bank of India ELSS Tax Saver Fund Growth", "Bank of India Flexi Cap Fund Growth", "Bank of India Liquid Fund Growth", "Bank of India Small Cap Fund Growth", "Baroda BNP Paribas Balanced Advantage Fund Growth", "Baroda BNP Paribas Flexi Cap Fund Growth", "Baroda BNP Paribas Large Cap Fund Growth", "Baroda BNP Paribas Liquid Fund Growth", "Baroda BNP Paribas Multi Asset Fund Growth", "Baroda BNP Paribas Multi Cap Fund Growth", "Canara Robeco Balanced Advantage Fund Growth", "Canara Robeco ELSS Tax Saver Growth", "Canara Robeco Equity Hybrid Fund Growth", "Canara Robeco Flexi Cap Fund Growth", "Canara Robeco Large and Mid Cap Fund Growth", "Canara Robeco Mid Cap Fund Growth", "Canara Robeco Multi Cap Fund Growth", "Canara Robeco Small Cap Fund Growth", "Canara Robeco Value Fund Growth", "DSP Dynamic Asset Allocation Fund Growth", "DSP ELSS Tax Saver Fund Growth", "DSP Flexi Cap Fund Growth", "DSP Healthcare Fund Growth", "DSP Large and Mid Cap Fund Growth", "DSP Mid Cap Fund Growth", "DSP Multi Asset Allocation Fund Growth", "DSP Multi Asset Omni Fund of Funds - Regular - Growth", "DSP Multicap Fund Growth", "DSP Quant Fund Growth", "DSP Silver ETF Fund of Fund Growth", "DSP Small Cap Fund Growth", "DSP Value Fund Growth", "Edelweiss Aggressive Hybrid Fund Growth", "Edelweiss Arbitrage Fund Growth", "Edelweiss Balanced Advantage Fund Growth", "Edelweiss Business Cycle Fund Growth", "Edelweiss Equity Savings Fund Growth", "Edelweiss Flexi Cap Fund Growth", "Edelweiss Large & Mid Cap Fund Growth", "Edelweiss Mid Cap Fund Growth", "Edelweiss Multi Asset Allocation Fund Growth", "Edelweiss Multi Asset Omni Fund of Fund Growth", "Edelweiss Multi Cap Fund Growth", "Edelweiss Small Cap Fund Growth", "Edelweiss US Technology Equity Fund of Fund Growth", "Franklin Build India Fund Growth", "Franklin India Flexi Cap Fund Growth", "Franklin India Focused Equity Fund Growth", "Franklin India Mid Cap Fund Growth", "Franklin India Small Cap Fund Growth", "HDFC Defence Fund Growth", "HDFC ELSS Tax Saver Growth", "HDFC Flexi Cap Fund Growth", "HDFC Mid Cap Fund Growth", "HDFC Small Cap Fund Growth", "HDFC Value Fund Growth", "HSBC Balanced Advantage Fund Growth", "HSBC Business Cycles Fund Growth", "HSBC Infrastructure Fund Growth", "HSBC Small Cap Fund Growth", "HSBC Value Fund Growth", "Helios Flexi Cap Fund Growth", "Helios Large and Mid Cap Fund Growth", "Helios Mid Cap Fund Growth", "Helios Small Cap Fund Growth", "ICICI Prudential All Seasons Bond Fund Growth", "ICICI Prudential Balanced Advantage Fund Growth", "ICICI Prudential Banking and Financial Services Fund Growth", "ICICI Prudential Business Cycle Fund Growth", "ICICI Prudential Dynamic Asset Allocation Active FOF - Growth", "ICICI Prudential Equity Savings Fund Growth", "ICICI Prudential Equity and Debt Fund Growth", "ICICI Prudential Flexicap Fund Growth", "ICICI Prudential Floating Interest Fund Growth", "ICICI Prudential Focused Equity Fund Growth", "ICICI Prudential India Opportunities Fund Growth", "ICICI Prudential Infrastructure Fund Growth", "ICICI Prudential Large and Mid Cap Fund Growth", "ICICI Prudential Liquid Fund Growth", "ICICI Prudential Manufacturing Fund Growth", "ICICI Prudential Medium Term Bond Fund Growth", "ICICI Prudential Midcap Fund Growth", "ICICI Prudential Multi-Asset Fund", "ICICI Prudential Multicap Fund Growth", "ICICI Prudential Savings Fund Growth", "ICICI Prudential Smallcap Fund Growth", "ICICI Prudential Thematic Advantage Fund (FOF) Growth", "ICICI Prudential Ultra Short Term Fund Growth", "ICICI Prudential Value Fund Growth", "ITI Balanced Advantage Fund Growth", "ITI Flexi Cap Fund Growth", "ITI Mid Cap Fund Growth", "ITI Multi Cap Fund Growth", "ITI Pharma and Healthcare Fund Growth", "ITI Small Cap Fund Growth", "Invesco India Arbitrage Fund Growth", "Invesco India Contra Fund Growth", "Invesco India ELSS Tax Saver Fund Growth", "Invesco India Financial Services Fund Growth", "Invesco India Flexi Cap Fund Growth", "Invesco India Mid Cap Fund Growth", "Invesco India Multicap Fund Growth", "Invesco India Small Cap Fund Growth", "Kotak Arbitrage Fund Growth", "Kotak Balanced Advantage Fund Growth", "Kotak Banking & Financial Services Fund Growth", "Kotak Equity Savings Fund Growth", "Kotak Large and Mid Cap Fund Growth", "Kotak Mid Cap Fund Growth", "Kotak Multi Asset Allocation Fund Growth", "Kotak Multicap Fund Growth", "Kotak Small Cap Fund Growth", "Mahindra Manulife Multi Cap Fund Growth", "Mirae Asset ELSS Tax Saver Fund Growth", "Mirae Asset Equity Savings Fund Growth", "Mirae Asset Flexi Cap Fund Growth", "Mirae Asset Focused Fund Growth", "Mirae Asset Great Consumer Fund Growth", "Mirae Asset Health Care Fund Growth", "Mirae Asset Large and Mid Cap Fund Growth", "Mirae Asset Midcap Fund Growth", "Mirae Asset Multicap Fund Growth", "Mirae Asset Small Cap Fund Growth", "Motilal Oswal Balanced Advantage Fund Growth", "Motilal Oswal Business Cycle Fund Growth", "Motilal Oswal ELSS Tax Saver Fund Growth", "Motilal Oswal Flexi Cap Fund Growth", "Motilal Oswal Large and Mid Cap Fund Growth", "Motilal Oswal Liquid Fund Growth", "Motilal Oswal Mid Cap Fund Growth", "Nippon India Balanced Advantage Fund Growth", "Nippon India Banking and Financial Services Fund Growth", "Nippon India ELSS Tax Saver Fund Growth", "Nippon India Focused Fund Growth", "Nippon India Gold Savings Fund Growth", "Nippon India Growth Mid Cap Fund Growth", "Nippon India MNC Fund Growth", "Nippon India Multi Asset Allocation Fund Growth", "Nippon India Multi Cap Fund Growth", "Nippon India Silver ETF Fund of Fund Growth", "Nippon India Small Cap Fund Growth", "Nippon India Value Fund Growth", "PGIM India Flexi Cap Fund Growth", "PGIM India Mid Cap Fund Growth", "PGIM India Small Cap Fund Growth", "Parag Parikh ELSS Tax Saver Fund Growth", "Parag Parikh Flexi Cap Fund Growth", "Parag Parikh Liquid Fund Growth", "Quant Aggressive Hybrid Fund Growth", "Quant BFSI Fund Growth", "Quant Business Cycle Fund Growth", "Quant Consumption Fund Growth", "Quant Dynamic Asset Allocation Fund Growth", "Quant ELSS Tax Saver Fund Growth", "Quant Flexi Cap Fund Growth", "Quant Healthcare Fund Growth", "Quant Liquid Plan Growth", "Quant Manufacturing Fund Growth", "Quant Mid Cap Fund Growth", "Quant Momentum Fund Growth", "Quant Multi Asset Allocation Fund Growth", "Quant Multi Cap Fund Growth", "Quant PSU Fund Growth", "Quant Quantamental Fund Growth", "Quant Small Cap Fund Growth", "Quant Teck Fund Growth", "Quant Value Fund Growth", "SBI Banking and Financial Services Fund Growth", "SBI ELSS Tax Saver Fund Growth", "SBI Energy Opportunities Fund Growth", "SBI Flexi Cap Fund Growth", "SBI Focused Fund Growth", "SBI Infrastructure Fund Growth", "SBI Large & Midcap Fund Growth", "SBI Large Cap Fund Growth", "SBI Mid Cap Fund Growth", "SBI Quant Fund Growth", "SBI Silver ETF Fund of Fund Growth", "SBI Small Cap Fund Growth", "Samco Active Momentum Fund Growth", "Samco Dynamic Asset Allocation Fund Growth", "Samco Flexi Cap Fund Growth", "Samco Multi Asset Allocation Fund Growth", "Sundaram Consumption Fund Growth", "Sundaram Mid Cap Fund Growth", "Sundaram Multi Cap Fund Growth", "Sundaram Multi Factor Fund Growth", "Sundaram Services Fund Growth", "Sundaram Small Cap Fund Growth", "Tata Arbitrage Fund Growth", "Tata Business Cycle Fund Growth", "Tata Flexi Cap Fund Growth", "Tata India Consumer Fund Growth", "Tata Mid Cap Fund Growth", "Tata Multi Asset Allocation Fund Growth", "Tata Nifty SDL Plus AAA PSU Bond Dec 2027 60:40 Index Fund Growth", "Tata Retirement Savings Fund Progresive Plan Growth", "Tata Small Cap Fund Growth", "Tata Value Fund Growth", "Titanium Hybrid Long Growth", "UTI Flexi Cap Fund Growth", "UTI Large and Mid Cap Fund Growth", "UTI Value Fund Growth", "Union Balanced Advantage Fund Growth", "Union Flexi Cap Fund Growth", "Union Large and Mid Cap Fund Growth", "Union Mid Cap Fund Growth", "Union Retirement Fund Growth", "WhiteOak Capital Balanced Advantage Fund Growth", "WhiteOak Capital ELSS Tax Saver Fund Growth", "WhiteOak Capital Equity Savings Fund Growth", "WhiteOak Capital Flexi Cap Fund Growth", "WhiteOak Capital Large and Mid Cap Fund Growth", "WhiteOak Capital Mid Cap Fund Growth", "WhiteOak Capital Multi Asset Allocation Fund Growth", "WhiteOak Capital Multi Cap Fund Growth", "WhiteOak Capital Quality Equity Fund Growth", "WhiteOak Capital Special Opportunities Fund Growth", "iSIF Equity Ex-Top 100 Long-Short Fund - Growth", "qsif Equity Ex Growth", "qsif Equity Long Growth"];
 
     function setupSearchSelect(inputId, dropdownId, hiddenId) {
@@ -429,7 +442,7 @@
         }
     }
 
-    // --- UPDATED REPORT GENERATOR (Centered Logo & High Res) ---
+    // --- REORGANIZED PDF LOGIC WITH CENTERED LOGO ---
     window.downloadReport = async (id) => {
         const docSnap = await getDoc(doc(db, "clients", id));
         if (!docSnap.exists()) return;
@@ -441,7 +454,7 @@
         if (logoImg && logoImg.complete) {
             const imgProps = pdf.getImageProperties(logoImg);
             const pageWidth = pdf.internal.pageSize.getWidth();
-            const pdfWidth = 100; // Increased width for centered impact
+            const pdfWidth = 100; 
             const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
             const xPos = (pageWidth - pdfWidth) / 2;
             pdf.addImage(logoImg, 'PNG', xPos, 15, pdfWidth, pdfHeight); 
@@ -465,7 +478,7 @@
         pdf.text(wrappedStaff, 145, 65);
 
         const metricData = [
-            ["Primary Goal", c.goal], // [cite: 5]
+            ["Primary Goal", c.goal], 
             ["SIP Fund Allocated", c.sipFund || "Not Specified"], 
             ["LS Fund Allocated", c.lsFund || "Not Specified"],
             ["Risk Profile", c.risk],
@@ -492,10 +505,10 @@
         pdf.text("Investment Requirements", 20, currentY);
 
         const requirementData = [
-            ["Required SIP (Standalone)", `Rs. ${Math.round(c.reqSIP || 0).toLocaleString('en-IN')}`], // 
-            ["Required Lump Sum (Standalone)", `Rs. ${Math.round(c.reqLS || 0).toLocaleString('en-IN')}`], // 
-            ["Actual SIP Commitment", `Rs. ${Number(c.actualSIP || 0).toLocaleString('en-IN')}`], // 
-            ["Actual Lump Sum Commitment", `Rs. ${Number(c.actualLS || 0).toLocaleString('en-IN')}`] // 
+            ["Required SIP (Standalone)", `Rs. ${Math.round(c.reqSIP || 0).toLocaleString('en-IN')}`], 
+            ["Required Lump Sum (Standalone)", `Rs. ${Math.round(c.reqLS || 0).toLocaleString('en-IN')}`], 
+            ["Actual SIP Commitment", `Rs. ${Number(c.actualSIP || 0).toLocaleString('en-IN')}`], 
+            ["Actual Lump Sum Commitment", `Rs. ${Number(c.actualLS || 0).toLocaleString('en-IN')}`] 
         ];
 
         pdf.autoTable({
@@ -547,68 +560,105 @@
         closeModal('formModal');
     };
 
-    function renderTable(data) {
-        const tbody = document.getElementById('tableBody');
-        const today = new Date();
-        let pendingReviews = 0;
-        if (data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="18" style="text-align:center; padding:40px;">No records.</td></tr>`;
-            return;
-        }
-        tbody.innerHTML = data.sort((a,b) => new Date(a.targetDateRaw) - new Date(b.targetDateRaw)).map((c, index) => {
-            const targetDate = new Date(c.targetDateRaw);
-            const reviewN = parseFloat(c.reviewN) || 2;
-            const reviewStart = new Date(targetDate); reviewStart.setFullYear(reviewStart.getFullYear() - reviewN);
-            const isCurrentlyReviewing = today >= reviewStart && today <= targetDate && c.status !== "Completed";
-            if (isCurrentlyReviewing) pendingReviews++;
-
-            const fundTooltip = `SIP Fund: ${c.sipFund || 'None'}\nLS Fund: ${c.lsFund || 'None'}`;
-            
-            // HYBRID TOOLTIP FOR REQ. INV
-            let reqTooltip = "Standalone Requirement";
-            if (c.type === 'SIP_LS') {
-                reqTooltip = `Split Requirement:\nSIP: ₹${Math.round(c.reqSIP || 0).toLocaleString('en-IN')}\nLS: ₹${Math.round(c.reqLS || 0).toLocaleString('en-IN')}`;
-            }
-
-            const diff = c.totalActualFV - c.fv;
-            const assignedList = Array.isArray(c.assigned) ? c.assigned : [c.assigned || "Unassigned"];
-            const assignedStack = `<div class="assigned-stack">${assignedList.map(name => `<span>${name}</span>`).join('')}</div>`;
-
-            return `
-            <tr ${isCurrentlyReviewing ? 'style="background-color: #fffbeb;"' : ''}>
-                <td>${index + 1}</td><td>${c.date}</td><td>${c.name}</td>
-                <td><span class="hover-cell" data-tooltip="${c.notes || 'No notes.'}">${c.goal}</span></td>
-                <td><span class="risk-pill ${c.risk}">${c.risk}</span></td>
-                <td>${assignedStack}</td>
-                <td><span class="hover-cell" data-tooltip="${fundTooltip}">${c.type.replace('_', '+')}</span></td>
-                <td>₹${Number(c.pv).toLocaleString()}</td><td>${c.years}Y</td>
-                <td>${c.inf}%</td><td>${c.growth}%</td><td><strong>₹${Math.round(c.fv).toLocaleString()}</strong></td>
-                <td>${c.targetDateDisplay}</td>
-                <td><span class="hover-cell" data-tooltip="${reqTooltip}">₹${Math.round(c.reqSIP || c.reqLS || 0).toLocaleString()}</span></td>
-                <td>₹${(Number(c.actualSIP || 0) + Number(c.actualLS || 0)).toLocaleString()}</td>
-                <td class="${diff >= 0 ? 'surplus' : 'deficit'}">₹${Math.abs(Math.round(diff)).toLocaleString()}</td>
-                <td><span class="status-pill ${isCurrentlyReviewing ? 'Under-Review' : c.status}">${isCurrentlyReviewing ? 'Under Review' : c.status}</span></td>
-                <td>
-                    <div class="actions-group">
-                        <i data-lucide="file-text" class="icon-btn" onclick="downloadReport('${c.firebaseId}')" style="color:#0891b2;"></i>
-                        <i data-lucide="edit-3" class="icon-btn" onclick="prepareEdit('${c.firebaseId}')" style="color:#64748b;"></i>
-                        <i data-lucide="trash-2" class="icon-btn" onclick="deletePlan('${c.firebaseId}')" style="color:#dc2626;"></i>
-                    </div>
-                </td>
-            </tr>`;
-        }).join('');
-        lucide.createIcons();
-        
-        // REORGANIZED STATUS ALERTS
-        document.getElementById('statLine').innerHTML = `${data.length} Plans Visible`;
-        const alertContainer = document.getElementById('reviewAlertContainer');
-        if (pendingReviews > 0) {
-            alertContainer.innerHTML = `<span class="pending-alert">• ${pendingReviews} Review Required</span>`;
-        } else {
-            alertContainer.innerHTML = "";
-        }
+function renderTable(data) {
+    const tbody = document.getElementById('tableBody');
+    const today = new Date();
+    let pendingReviews = 0;
+    if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="18" style="text-align:center; padding:40px;">No records.</td></tr>`;
+        return;
     }
+    tbody.innerHTML = data.sort((a,b) => new Date(a.targetDateRaw) - new Date(b.targetDateRaw)).map((c, index) => {
+        const targetDate = new Date(c.targetDateRaw);
+        const reviewN = parseFloat(c.reviewN) || 2;
+        const reviewStart = new Date(targetDate); reviewStart.setFullYear(reviewStart.getFullYear() - reviewN);
+        const isCurrentlyReviewing = today >= reviewStart && today <= targetDate && c.status !== "Completed";
+        if (isCurrentlyReviewing) pendingReviews++;
 
+        // 1. Dynamic Fund Tooltip: Only show relevant funds [cite: 1]
+        let fundTooltip = "";
+        if (c.type === 'SIP') {
+            fundTooltip = `SIP Fund: ${c.sipFund || 'None'}`;
+        } else if (c.type === 'LS') {
+            fundTooltip = `LS Fund: ${c.lsFund || 'None'}`;
+        } else {
+            fundTooltip = `SIP Fund: ${c.sipFund || 'None'}\nLS Fund: ${c.lsFund || 'None'}`;
+        }
+        
+        // 2. REQ. INV Display & Tooltip: Stacked for Hybrid [cite: 10]
+        const reqSip = Math.round(c.reqSIP || 0);
+        const reqLs = Math.round(c.reqLS || 0);
+        let reqDisplay = "";
+        let reqTooltip = "Standalone Requirement";
+
+        if (c.type === 'SIP_LS') {
+            reqDisplay = `
+                <div style="display: flex; flex-direction: column; line-height: 1.2;">
+                    <span>₹${reqSip.toLocaleString('en-IN')}<small style="color: var(--text-muted); font-size: 8px;">/mo</small></span>
+                    <span style="border-top: 1px solid #e2e8f0; margin-top: 2px; padding-top: 2px;">₹${reqLs.toLocaleString('en-IN')}</span>
+                </div>`;
+            reqTooltip = `Full Split Requirement:\nSIP: ₹${reqSip.toLocaleString('en-IN')}/mo\nLS: ₹${reqLs.toLocaleString('en-IN')}`;
+        } else if (c.type === 'SIP') {
+            reqDisplay = `₹${reqSip.toLocaleString('en-IN')}<small style="color: var(--text-muted); font-size: 8px;">/mo</small>`;
+        } else {
+            reqDisplay = `₹${reqLs.toLocaleString('en-IN')}`;
+        }
+
+        // 3. ACTUAL INV Display & Maturity Hover [cite: 10]
+        const actSip = Number(c.actualSIP || 0);
+        const actLs = Number(c.actualLS || 0);
+        let actualDisplay = "";
+        
+        if (c.type === 'SIP_LS') {
+            actualDisplay = `
+                <div style="display: flex; flex-direction: column; line-height: 1.2;">
+                    <span>₹${actSip.toLocaleString('en-IN')}<small style="color: var(--text-muted); font-size: 8px;">/mo</small></span>
+                    <span style="border-top: 1px solid #e2e8f0; margin-top: 2px; padding-top: 2px;">₹${actLs.toLocaleString('en-IN')}</span>
+                </div>`;
+        } else if (c.type === 'SIP') {
+            actualDisplay = `₹${actSip.toLocaleString('en-IN')}<small style="color: var(--text-muted); font-size: 8px;">/mo</small>`;
+        } else {
+            actualDisplay = `₹${actLs.toLocaleString('en-IN')}`;
+        }
+
+        const maturityTooltip = `Projected Maturity:\n₹${Math.round(c.totalActualFV || 0).toLocaleString('en-IN')}`;
+        const diff = (c.totalActualFV || 0) - (c.fv || 0);
+        const assignedList = Array.isArray(c.assigned) ? c.assigned : [c.assigned || "Unassigned"];
+        const assignedStack = `<div class="assigned-stack">${assignedList.map(name => `<span>${name}</span>`).join('')}</div>`;
+
+        return `
+        <tr ${isCurrentlyReviewing ? 'style="background-color: #fffbeb;"' : ''}>
+            <td>${index + 1}</td><td>${c.date}</td><td>${c.name}</td>
+            <td><span class="hover-cell" data-tooltip="${c.notes || 'No notes.'}">${c.goal}</span></td>
+            <td><span class="risk-pill ${c.risk}">${c.risk}</span></td>
+            <td>${assignedStack}</td>
+            <td><span class="hover-cell" data-tooltip="${fundTooltip}">${c.type.replace('_', '+')}</span></td>
+            <td>₹${Number(c.pv).toLocaleString()}</td><td>${c.years}Y</td>
+            <td>${c.inf}%</td><td>${c.growth}%</td><td><strong>₹${Math.round(c.fv).toLocaleString()}</strong></td>
+            <td>${c.targetDateDisplay}</td>
+            <td><span class="hover-cell" data-tooltip="${reqTooltip}">${reqDisplay}</span></td>
+            <td><span class="hover-cell" data-tooltip="${maturityTooltip}">${actualDisplay}</span></td>
+            <td class="${diff >= 0 ? 'surplus' : 'deficit'}">₹${Math.abs(Math.round(diff)).toLocaleString()}</td>
+            <td><span class="status-pill ${isCurrentlyReviewing ? 'Under-Review' : c.status}">${isCurrentlyReviewing ? 'Under Review' : c.status}</span></td>
+            <td>
+                <div class="actions-group">
+                    <i data-lucide="file-text" class="icon-btn" onclick="downloadReport('${c.firebaseId}')" style="color:#0891b2;"></i>
+                    <i data-lucide="edit-3" class="icon-btn" onclick="prepareEdit('${c.firebaseId}')" style="color:#64748b;"></i>
+                    <i data-lucide="trash-2" class="icon-btn" onclick="deletePlan('${c.firebaseId}')" style="color:#dc2626;"></i>
+                </div>
+            </td>
+        </tr>`;
+    }).join('');
+    lucide.createIcons();
+    
+    document.getElementById('statLine').innerHTML = `${data.length} Plans Visible`;
+    const alertContainer = document.getElementById('reviewAlertContainer');
+    if (pendingReviews > 0) {
+        alertContainer.innerHTML = `<span class="pending-alert">• ${pendingReviews} Review Required</span>`;
+    } else {
+        alertContainer.innerHTML = "";
+    }
+}
     window.applyFilters = () => {
         const search = document.getElementById('searchInput').value.toLowerCase();
         const staff = document.getElementById('filterAssigned').value;
