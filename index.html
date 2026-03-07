@@ -1,224 +1,162 @@
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>FideloWealth | Financial Goal Planner</title>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-        <script src="https://unpkg.com/lucide@latest"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-        
-        <style>
-            :root {
-                --bg-color: #f8fafc;
-                --card-bg: #ffffff;
-                --primary-blue: #003366;
-                --text-main: #1e293b;
-                --text-muted: #64748b;
-                --border-color: #e2e8f0;
-                --status-active-bg: #dcfce7;
-                --status-active-text: #16a34a;
-                --status-review-bg: #ffedd5;
-                --status-review-text: #d97706;
-                --status-paused-bg: #f1f5f9;
-                --status-paused-text: #64748b;
-                --status-completed-bg: #dbeafe;
-                --status-completed-text: #1d4ed8;
-                --risk-high: #fee2e2; --risk-high-text: #dc2626;
-                --risk-med: #fef3c7; --risk-med-text: #d97706;
-                --risk-low: #dcfce7; --risk-low-text: #16a34a;
-            }
-
-            body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); margin: 0; padding: 20px; color: var(--text-main); overflow-x: hidden; }
-            
-            #authScreen { position: fixed; inset: 0; background: #001f3f; display: flex; justify-content: center; align-items: center; z-index: 9999; }
-            .login-card { background: white; padding: 40px; border-radius: 12px; width: 360px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); text-align: center; }
-            .login-card h2 { margin-bottom: 24px; color: #001f3f; font-weight: 800; }
-            .login-group { margin-bottom: 15px; text-align: left; }
-            .login-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; }
-            .login-group input { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 14px; }
-            .btn-login { width: 100%; background: #2563eb; color: white; border: none; padding: 14px; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 10px; }
-            .error-msg { color: #dc2626; font-size: 12px; margin-top: 10px; display: none; }
-
-            .dashboard-container { max-width: 100%; margin: 0 auto; background: var(--card-bg); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 24px; display: none; box-sizing: border-box; }
-            /* Navigation Links Style */
-    /* Ensure the clickable title keeps its original branding color */
-    .title-area a h1 {
-        color: #001f3f;
-        cursor: pointer;
-        transition: opacity 0.2s;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FideloWealth | Financial Goal Planner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+<style>
+    :root {
+        --bg-color: #f8fafc;
+        --card-bg: #ffffff;
+        --primary-blue: #003366;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --border-color: #e2e8f0;
+        --status-active-bg: #dcfce7;
+        --status-active-text: #16a34a;
+        --status-review-bg: #ffedd5;
+        --status-review-text: #d97706;
+        --status-paused-bg: #f1f5f9;
+        --status-paused-text: #64748b;
+        --status-completed-bg: #dbeafe;
+        --status-completed-text: #1d4ed8;
+        --risk-high: #fee2e2; --risk-high-text: #dc2626;
+        --risk-med: #fef3c7; --risk-med-text: #d97706;
+        --risk-low: #dcfce7; --risk-low-text: #16a34a;
     }
 
-    .title-area a:hover h1 {
-        opacity: 0.7;
-    }
+    body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); margin: 0; padding: 20px; color: var(--text-main); overflow-x: hidden; }
+    
+    /* Auth Screen */
+    #authScreen { position: fixed; inset: 0; background: #001f3f; display: flex; justify-content: center; align-items: center; z-index: 9999; }
+    .login-card { background: white; padding: 40px; border-radius: 12px; width: 360px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); text-align: center; }
+    .login-card h2 { margin-bottom: 24px; color: #001f3f; font-weight: 800; }
+    .login-group { margin-bottom: 15px; text-align: left; }
+    .login-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; }
+    .login-group input { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+    .btn-login { width: 100%; background: #2563eb; color: white; border: none; padding: 14px; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+    .error-msg { color: #dc2626; font-size: 12px; margin-top: 10px; display: none; }
 
-    /* Navigation Links Style */
-    .nav-links {
-        display: flex;
-        gap: 24px;
-        margin-left: 40px;
-        border-left: 1px solid var(--border-color);
-        padding-left: 24px;
-    }
+    /* Dashboard Layout */
+    .dashboard-container { max-width: 100%; margin: 0 auto; background: var(--card-bg); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 24px; display: none; box-sizing: border-box; }
+    .dashboard-header { display: flex; flex-direction: column; gap: 20px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 24px; }
+    .header-top-row { display: flex; justify-content: space-between; align-items: center; }
+    .header-bottom-row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); }
+
+    .brand-section { display: flex; align-items: center; gap: 40px; }
+    .company-logo { height: 50px; display: flex; align-items: center; }
+    .company-logo img { height: 100%; object-fit: contain; }
+
+    .nav-links { display: flex; align-items: center; gap: 24px; }
 
     .nav-link {
         text-decoration: none;
-        color: var(--text-muted);
-        font-size: 13px;
+        color: #555f6b;
+        font-size: 14px;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.025em;
+        letter-spacing: 0.05em;
         display: flex;
         align-items: center;
-        gap: 8px;
-        transition: all 0.2s;
-    }
-
-    .nav-link:hover {
-        color: #2563eb;
-    }
-
-    .nav-link i {
-        width: 16px;
-        height: 16px;
-    }
-
-    .nav-link:hover {
-        color: var(--primary-blue);
-    }
-
-    .nav-link i {
-        width: 16px;
-    }   
-            /* REORGANIZED HEADER */
-            .dashboard-header { display: flex; flex-direction: column; gap: 20px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 24px; }
-            .header-top-row { display: flex; justify-content: space-between; align-items: center; }
-            .header-bottom-row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); }
-            
-            .brand-section { display: flex; align-items: center; gap: 20px; }
-            .company-logo { height: 50px; display: flex; align-items: center; }
-            .company-logo img { height: 100%; object-fit: contain; }
-
-            .title-area { border-left: 2px solid var(--border-color); padding-left: 20px; }
-            .title-area h1 { font-size: 18px; margin: 0; font-weight: 800; color: #001f3f; }
-            .stats-line { display: flex; align-items: center; gap: 12px; margin-top: 4px; font-size: 12px; font-weight: 600; color: var(--text-muted); }
-
-            @keyframes pulse-alert { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
-            .pending-alert { color: #f59e0b; font-weight: 700; background: #fffbeb; padding: 5px 12px; border-radius: 8px; border: 1px solid #fef3c7; animation: pulse-alert 2s infinite; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
-            
-            .btn-add { background: var(--primary-blue); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; }
-            .btn-export { background: #16a34a; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; }
-            .btn-logout { background: white; color: #475569; border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; }
-
-            .search-group { position: relative; display: flex; align-items: center; background: white; border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; height: 46px; }
-            .search-group input, .search-group select { padding: 0 12px 0 40px; border: none; outline: none; font-size: 14px; background: transparent; min-width: 180px; height: 100%; }
-            .search-group i { position: absolute; left: 14px; width: 18px; color: var(--text-muted); z-index: 1; }
-
-            .review-horizon-box { background: #fff; border: 1px solid var(--border-color); border-radius: 10px; display: flex; align-items: center; padding: 0 15px; height: 46px; }
-            .review-horizon-box label { font-size: 10px; font-weight: 800; color: #d97706; margin-right: 8px; text-transform: uppercase; }
-
-            .table-wrapper { width: 100%; overflow-x: auto; border: 1px solid var(--border-color); border-radius: 12px; }
-            table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
-            th { padding: 14px 10px; color: #64748b; text-align: center; border-bottom: 1px solid var(--border-color); font-weight: 700; background: #f8fafc; text-transform: uppercase; }
-            td { padding: 14px 10px; border-bottom: 1px solid var(--border-color); text-align: center; }
-            
-            .hover-cell { font-weight: 700; color: #1e293b; position: relative; cursor: help; border-bottom: 1px dotted #cbd5e1; }
-            .hover-cell:hover::after { content: attr(data-tooltip); position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 10px 14px; border-radius: 8px; font-size: 11px; white-space: pre-wrap; z-index: 100; pointer-events: none; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4); line-height: 1.5; width: 220px; text-align: left; }
-
-            .status-pill { padding: 5px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
-            .Active { background: var(--status-active-bg); color: var(--status-active-text); }
-            .Under-Review { background: var(--status-review-bg); color: var(--status-review-text); }
-            .Paused { background: var(--status-paused-bg); color: var(--status-paused-text); }
-            .Completed { background: var(--status-completed-bg); color: var(--status-completed-text); }
-            
-            .risk-pill { padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; }
-            .High { background: var(--risk-high); color: var(--risk-high-text); }
-            .Medium { background: var(--risk-med); color: var(--risk-med-text); }
-            .Low { background: var(--risk-low); color: var(--risk-low-text); }
-
-            .assigned-stack { display: flex; flex-direction: column; gap: 2px; line-height: 1.1; font-size: 9px; color: #475569; font-weight: 600; align-items: center; }
-            .deficit { color: #dc2626; font-weight: 700; }
-            .surplus { color: #16a34a; font-weight: 700; }
-
-            .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px); }
-            .modal-card { background: white; border-radius: 16px; width: 720px; padding: 32px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
-            .form-section-title { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #2563eb; margin: 24px 0 12px 0; letter-spacing: 0.05em; border-bottom: 1px solid var(--border-color); padding-bottom: 6px; }
-            .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-            .form-group { display: flex; flex-direction: column; gap: 6px; position: relative; }
-            .form-group label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
-            .form-group input, .form-group select, .form-group textarea { padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; }
-
-            .search-select-container { position: relative; width: 100%; }
-            .search-select-input { width: 100%; box-sizing: border-box; border: 2px solid #3b82f6 !important; font-weight: 600; color: #1e40af; }
-            .search-select-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border-color); max-height: 200px; overflow-y: auto; z-index: 10; display: none; border-radius: 8px; }
-            .search-select-option { padding: 10px 12px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f1f5f9; }
-
-    /* Sub-investment row styling */
-    .sub-investment-row {
-        background-color: #f5f3ff !important; /* Light Purple/Indigo */
-        border-left: 4px solid #7c3aed;
-    }
-
-    .sub-investment-row td {
-        color: #4338ca;
-    }
-
-    .icon-sub {
-        color: #7c3aed;
+        gap: 12px;
+        transition: all 0.2s ease;
+        white-space: nowrap;
         cursor: pointer;
-        margin-right: 8px;
-        transition: transform 0.2s;
     }
 
-    .icon-sub:hover {
-        transform: scale(1.2);
+    .nav-link:hover { color: #2563eb; }
+    .nav-link.active { color: #001f3f; }
+    .nav-link i { width: 20px; height: 20px; }
+
+    .vertical-divider {
+        width: 1px;
+        height: 24px;
+        background-color: var(--border-color);
+        align-self: center;
     }
 
-    .sub-tag {
-        font-size: 9px;
-        background: #ddd6fe;
-        color: #5b21b6;
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-weight: 800;
-        margin-right: 5px;
-    }
-
-        /* Forces the investment containers to take full width of the grid */
-    .fund-selection-box { 
-        background: #f0f7ff; 
-        border: 1px solid #bfdbfe; 
-        border-radius: 12px; 
-        padding: 16px; 
-        margin-top: 8px;
-        grid-column: span 2; /* This makes it full width */
-    }
-
-    /* Internal grid for the SIP/LS inputs to keep labels and inputs organized */
-    .fund-input-row {
-        display: grid; 
-        grid-template-columns: 1fr 2fr; 
-        gap: 15px;
-        width: 100%;
-    }
-
-
+    /* Status and Info Elements */
+    .stats-line { display: flex; align-items: center; gap: 12px; margin-top: 4px; font-size: 12px; font-weight: 600; color: var(--text-muted); }
+    @keyframes pulse-alert { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+    .pending-alert { color: #f59e0b; font-weight: 700; background: #fffbeb; padding: 5px 12px; border-radius: 8px; border: 1px solid #fef3c7; animation: pulse-alert 2s infinite; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
     
-            .req-box { grid-column: span 1; border-radius: 10px; padding: 16px; border: 1px solid #e2e8f0; }
-            .solo-path { background: #fffbeb; border-color: #fef3c7; }
-            .inter-path { background: #f0f9ff; border-color: #e0f2fe; }
-            .amt-display { font-weight: 800; font-size: 15px; color: #0f172a; margin-top: 4px; }
-            .amt-box { font-weight: 700; color: #0369a1; background: #e0f2fe; padding: 8px 12px; border-radius: 6px; font-size: 14px; margin-top: 5px; text-align: center; }
+    /* Buttons */
+    .btn-add { background: var(--primary-blue); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; }
+    .btn-export { background: #16a34a; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; }
+    .btn-logout { background: white; color: #475569; border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; }
 
-            .modal-calc-footer { background: #1e293b; color: white; padding: 20px; border-radius: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 13px; margin-top: 24px; }
-            .modal-calc-footer div { display: flex; justify-content: space-between; border-bottom: 1px solid #334155; padding: 8px 0; }
-            .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px; }
-            .btn-submit { background: #2563eb; color: white; border: none; padding: 14px 28px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 14px; }
-            .btn-cancel { background: white; border: 1px solid var(--border-color); padding: 14px 28px; border-radius: 10px; cursor: pointer; font-weight: 600; color: var(--text-muted); }
-        </style>
+    /* Search and Filters */
+    .search-group { position: relative; display: flex; align-items: center; background: white; border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; height: 46px; }
+    .search-group input, .search-group select { padding: 0 12px 0 40px; border: none; outline: none; font-size: 14px; background: transparent; min-width: 180px; height: 100%; }
+    .search-group i { position: absolute; left: 14px; width: 18px; color: var(--text-muted); z-index: 1; }
+    .review-horizon-box { background: #fff; border: 1px solid var(--border-color); border-radius: 10px; display: flex; align-items: center; padding: 0 15px; height: 46px; }
+    .review-horizon-box label { font-size: 10px; font-weight: 800; color: #d97706; margin-right: 8px; text-transform: uppercase; }
+
+    /* Table Styles */
+    .table-wrapper { width: 100%; overflow-x: auto; border: 1px solid var(--border-color); border-radius: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
+    th { padding: 14px 10px; color: #64748b; text-align: center; border-bottom: 1px solid var(--border-color); font-weight: 700; background: #f8fafc; text-transform: uppercase; }
+    td { padding: 14px 10px; border-bottom: 1px solid var(--border-color); text-align: center; }
+    
+    .hover-cell { font-weight: 700; color: #1e293b; position: relative; cursor: help; border-bottom: 1px dotted #cbd5e1; }
+    .hover-cell:hover::after { content: attr(data-tooltip); position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 10px 14px; border-radius: 8px; font-size: 11px; white-space: pre-wrap; z-index: 100; pointer-events: none; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4); line-height: 1.5; width: 220px; text-align: left; }
+
+    .status-pill { padding: 5px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+    .Active { background: var(--status-active-bg); color: var(--status-active-text); }
+    .Under-Review { background: var(--status-review-bg); color: var(--status-review-text); }
+    .Paused { background: var(--status-paused-bg); color: var(--status-paused-text); }
+    .Completed { background: var(--status-completed-bg); color: var(--status-completed-text); }
+    
+    .risk-pill { padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; }
+    .High { background: var(--risk-high); color: var(--risk-high-text); }
+    .Medium { background: var(--risk-med); color: var(--risk-med-text); }
+    .Low { background: var(--risk-low); color: var(--risk-low-text); }
+
+    .assigned-stack { display: flex; flex-direction: column; gap: 2px; line-height: 1.1; font-size: 9px; color: #475569; font-weight: 600; align-items: center; }
+    .deficit { color: #dc2626; font-weight: 700; }
+    .surplus { color: #16a34a; font-weight: 700; }
+
+    /* Modal & Forms */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px); }
+    .modal-card { background: white; border-radius: 16px; width: 720px; padding: 32px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+    .form-section-title { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #2563eb; margin: 24px 0 12px 0; letter-spacing: 0.05em; border-bottom: 1px solid var(--border-color); padding-bottom: 6px; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; position: relative; }
+    .form-group label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+    .form-group input, .form-group select, .form-group textarea { padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; }
+
+    .search-select-container { position: relative; width: 100%; }
+    .search-select-input { width: 100%; box-sizing: border-box; border: 2px solid #3b82f6 !important; font-weight: 600; color: #1e40af; }
+    .search-select-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border-color); max-height: 200px; overflow-y: auto; z-index: 10; display: none; border-radius: 8px; }
+    .search-select-option { padding: 10px 12px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f1f5f9; }
+
+    .fund-selection-box { background: #f0f7ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 16px; margin-top: 8px; grid-column: span 2; }
+    .fund-input-row { display: grid; grid-template-columns: 1fr 2fr; gap: 15px; width: 100%; }
+    
+    .req-box { grid-column: span 1; border-radius: 10px; padding: 16px; border: 1px solid #e2e8f0; }
+    .solo-path { background: #fffbeb; border-color: #fef3c7; }
+    .inter-path { background: #f0f9ff; border-color: #e0f2fe; }
+    .amt-display { font-weight: 800; font-size: 15px; color: #0f172a; margin-top: 4px; }
+    .amt-box { font-weight: 700; color: #0369a1; background: #e0f2fe; padding: 8px 12px; border-radius: 6px; font-size: 14px; margin-top: 5px; text-align: center; }
+
+    .modal-calc-footer { background: #1e293b; color: white; padding: 20px; border-radius: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 13px; margin-top: 24px; }
+    .modal-calc-footer div { display: flex; justify-content: space-between; border-bottom: 1px solid #334155; padding: 8px 0; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px; }
+    .btn-submit { background: #2563eb; color: white; border: none; padding: 14px 28px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 14px; }
+    .btn-cancel { background: white; border: 1px solid var(--border-color); padding: 14px 28px; border-radius: 10px; cursor: pointer; font-weight: 600; color: var(--text-muted); }
+
+    /* Legend Style for composition chart */
+    .chart-legend { display: flex; gap: 15px; margin-top: 15px; font-size: 10px; font-weight: 700; }
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .legend-box { width: 10px; height: 10px; border-radius: 2px; }
+</style>
     </head>
     <body>
 
@@ -236,25 +174,27 @@
         <div class="dashboard-container" id="mainDashboard">
             <header class="dashboard-header">
                 <div class="header-top-row">
-    <div class="brand-section">
-        <div class="company-logo">
-            <img src="logo.png" alt="FideloWealth Logo" id="logoImg">
-        </div>
-        <div class="title-area">
-            <a href="index.html" style="text-decoration: none;">
-                <h1>Financial Goal Planner</h1>
-            </a>
-        </div>
-
-        <nav class="nav-links">
-            <a href="tasks.html" class="nav-link">
-                <i data-lucide="check-square"></i> Daily Task
-            </a>
-            <a href="reports.html" class="nav-link">
-                <i data-lucide="file-bar-chart"></i> Client Reports
-            </a>
-        </nav>
+<div class="brand-section">
+    <div class="company-logo">
+        <img src="logo.png" alt="FideloWealth Logo" id="logoImg">
     </div>
+    
+    <nav class="nav-links">
+        <a href="index.html" class="nav-link active">
+            <i data-lucide="target"></i> FINANCIAL GOAL PLANNER
+        </a>
+        
+        <div class="vertical-divider"></div> <a href="tasks.html" class="nav-link">
+            <i data-lucide="check-square"></i>
+            DAILY TASK
+        </a>
+        
+        <a href="reports.html" class="nav-link">
+            <i data-lucide="file-bar-chart"></i>
+            CLIENT REPORTS
+        </a>
+    </nav>
+</div>
                     <div id="reviewAlertContainer"></div>
                 </div>
 
@@ -294,6 +234,7 @@
                     <tbody id="tableBody"></tbody>
                 </table>
             </div>
+            <div id="statLine" style="padding:15px; font-size:11px; color:var(--text-muted); font-weight:700;"></div>
         </div>
 
         <div class="modal-overlay" id="formModal">
@@ -419,6 +360,56 @@
             </div>
         </div>
 
+        <div class="modal-overlay" id="previewModal">
+            <div class="modal-card" style="width: 850px; border-top: 5px solid var(--primary-blue);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <div>
+                        <h2 id="p_name" style="margin:0; font-size:24px; color:#0f172a;">Client Profile</h2>
+                        <p id="p_goal_type" style="margin:4px 0 0 0; color:var(--text-muted); font-weight:600; text-transform:uppercase; font-size:12px;"></p>
+                    </div>
+                    <button onclick="closeModal('previewModal')" style="background:none; border:none; cursor:pointer; font-size:28px; color:#94a3b8;">&times;</button>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 30px;">
+                    <div>
+                        <div class="form-section-title" style="margin-top:0;">Financial Snapshot</div>
+                        <div style="background:#f8fafc; border:1px solid var(--border-color); border-radius:12px; padding:20px; display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                            <div><label style="font-size:10px; color:var(--text-muted); font-weight:800;">PRESENT COST</label><div id="p_pv_val" style="font-weight:700;"></div></div>
+                            <div><label style="font-size:10px; color:var(--text-muted); font-weight:800;">FUTURE GOAL</label><div id="p_fv_val" style="font-weight:700; color:#2563eb;"></div></div>
+                            <div><label style="font-size:10px; color:var(--text-muted); font-weight:800;">TARGET DATE</label><div id="p_target_val" style="font-weight:700;"></div></div>
+                            <div><label style="font-size:10px; color:var(--text-muted); font-weight:800;">TIME HORIZON</label><div id="p_years_val" style="font-weight:700;"></div></div>
+                        </div>
+
+                        <div class="form-section-title">Deployment Strategy</div>
+                        <div style="background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+                                <div style="flex:1;"><label style="font-size:10px; color:var(--text-muted); font-weight:800;">ACTUAL INVESTED</label><div id="p_actual_amt" style="font-size:18px; font-weight:800; color:#0f172a;"></div></div>
+                                <div style="flex:1;"><label style="font-size:10px; color:var(--text-muted); font-weight:800;">FUNDING GAP</label><div id="p_gap_amt" style="font-size:18px; font-weight:800; color:#dc2626;"></div></div>
+                            </div>
+                            <div id="p_strategy_pill" style="font-size:11px; font-weight:700; color:#0369a1; background:#e0f2fe; display:inline-block; padding:4px 10px; border-radius:4px;"></div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; background:#fcfcfc; border-radius:12px; border:1px solid #f1f1f1; padding: 20px;">
+                        <div style="width: 200px; height: 200px;">
+                            <canvas id="goalChart"></canvas>
+                        </div>
+                        <div id="p_completion_pct" style="margin-top:15px; font-weight:800; font-size:18px; color:var(--primary-blue);"></div>
+                        <div class="chart-legend">
+                            <div class="legend-item"><div class="legend-box" style="background:#2563eb;"></div> SIP</div>
+                            <div class="legend-item"><div class="legend-box" style="background:#7c3aed;"></div> Lump Sum</div>
+                            <div class="legend-item"><div class="legend-box" style="background:#f1f5f9;"></div> Gap</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top:30px; padding-top:20px; border-top:1px solid #f1f5f9; text-align:right;">
+                    <button class="btn-export" id="p_download_btn" style="background:var(--primary-blue);">Download Detailed PDF</button>
+                    <button class="btn-cancel" onclick="closeModal('previewModal')" style="padding:10px 20px;">Close Profile</button>
+                </div>
+            </div>
+        </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -436,6 +427,7 @@
         const db = getFirestore(app);
         const clientsCol = collection(db, "clients");
         let allClients = [];
+        let goalChartInstance = null;
 
         const FUND_OPTIONS = ["None", "Aditya Birla Sun Life Banking and Financial Services Fund Growth", "Aditya Birla Sun Life Flexi Cap Fund Growth", "Aditya Birla Sun Life Low Duration Fund Growth", "Aditya Birla Sun Life MNC Fund Growth", "Aditya Birla Sun Life Multi Asset Allocation Fund Growth", "Aditya Birla Sun Life Value Fund Growth", "Altiva Hybrid Long Growth", "Axis Balanced Advantage Fund Growth", "Axis Business Cycles Fund Growth", "Axis Consumption Fund Growth", "Axis ELSS Tax Saver Fund Growth", "Axis Flexi Cap Fund Growth", "Axis Focused Fund Growth", "Axis India Manufacturing Fund Growth", "Axis Large and Mid Cap Fund Growth", "Axis Midcap Fund Growth", "Axis Multicap Fund Growth", "Axis Small Cap Fund Growth", "Bandhan Arbitrage Fund Growth", "Bandhan Business Cycle Fund Growth", "Bandhan Corporate Bond Fund Growth", "Bandhan Crisil IBX 90:10 SDL Plus Gilt April 2032 Index Fund Growth", "Bandhan Crisil IBX Gilt April 2032 Index Fund Growth", "Bandhan ELSS Tax Saver Fund Growth", "Bandhan Financial Services Fund Growth", "Bandhan Flexi Cap Fund Growth", "Bandhan Focused Fund Growth", "Bandhan Income Plus Arbitrage Active FOF Growth", "Bandhan Infrastructure Fund Growth", "Bandhan Large and Mid Cap Fund Growth", "Bandhan Midcap Fund Growth", "Bandhan Money Market Fund Growth", "Bandhan Multi Asset Allocation Fund Growth", "Bandhan Small Cap Fund Growth", "Bandhan Value Fund Growth", "Bank of India ELSS Tax Saver Fund Growth", "Bank of India Flexi Cap Fund Growth", "Bank of India Liquid Fund Growth", "Bank of India Small Cap Fund Growth", "Baroda BNP Paribas Balanced Advantage Fund Growth", "Baroda BNP Paribas Flexi Cap Fund Growth", "Baroda BNP Paribas Large Cap Fund Growth", "Baroda BNP Paribas Liquid Fund Growth", "Baroda BNP Paribas Multi Asset Fund Growth", "Baroda BNP Paribas Multi Cap Fund Growth", "Canara Robeco Balanced Advantage Fund Growth", "Canara Robeco ELSS Tax Saver Growth", "Canara Robeco Equity Hybrid Fund Growth", "Canara Robeco Flexi Cap Fund Growth", "Canara Robeco Large and Mid Cap Fund Growth", "Canara Robeco Mid Cap Fund Growth", "Canara Robeco Multi Cap Fund Growth", "Canara Robeco Small Cap Fund Growth", "Canara Robeco Value Fund Growth", "DSP Dynamic Asset Allocation Fund Growth", "DSP ELSS Tax Saver Fund Growth", "DSP Flexi Cap Fund Growth", "DSP Healthcare Fund Growth", "DSP Large and Mid Cap Fund Growth", "DSP Mid Cap Fund Growth", "DSP Multi Asset Allocation Fund Growth", "DSP Multi Asset Omni Fund of Funds - Regular - Growth", "DSP Multicap Fund Growth", "DSP Quant Fund Growth", "DSP Silver ETF Fund of Fund Growth", "DSP Small Cap Fund Growth", "DSP Value Fund Growth", "Edelweiss Aggressive Hybrid Fund Growth", "Edelweiss Arbitrage Fund Growth", "Edelweiss Balanced Advantage Fund Growth", "Edelweiss Business Cycle Fund Growth", "Edelweiss Equity Savings Fund Growth", "Edelweiss Flexi Cap Fund Growth", "Edelweiss Large & Mid Cap Fund Growth", "Edelweiss Mid Cap Fund Growth", "Edelweiss Multi Asset Allocation Fund Growth", "Edelweiss Multi Asset Omni Fund of Fund Growth", "Edelweiss Multi Cap Fund Growth", "Edelweiss Small Cap Fund Growth", "Edelweiss US Technology Equity Fund of Fund Growth", "Franklin Build India Fund Growth", "Franklin India Flexi Cap Fund Growth", "Franklin India Focused Equity Fund Growth", "Franklin India Mid Cap Fund Growth", "Franklin India Small Cap Fund Growth", "HDFC Defence Fund Growth", "HDFC ELSS Tax Saver Growth", "HDFC Flexi Cap Fund Growth", "HDFC Mid Cap Fund Growth", "HDFC Small Cap Fund Growth", "HDFC Value Fund Growth", "HSBC Balanced Advantage Fund Growth", "HSBC Business Cycles Fund Growth", "HSBC Infrastructure Fund Growth", "HSBC Small Cap Fund Growth", "HSBC Value Fund Growth", "Helios Flexi Cap Fund Growth", "Helios Large and Mid Cap Fund Growth", "Helios Mid Cap Fund Growth", "Helios Small Cap Fund Growth", "ICICI Prudential All Seasons Bond Fund Growth", "ICICI Prudential Balanced Advantage Fund Growth", "ICICI Prudential Banking and Financial Services Fund Growth", "ICICI Prudential Business Cycle Fund Growth", "ICICI Prudential Dynamic Asset Allocation Active FOF - Growth", "ICICI Prudential Equity Savings Fund Growth", "ICICI Prudential Equity and Debt Fund Growth", "ICICI Prudential Flexicap Fund Growth", "ICICI Prudential Floating Interest Fund Growth", "ICICI Prudential Focused Equity Fund Growth", "ICICI Prudential India Opportunities Fund Growth", "ICICI Prudential Infrastructure Fund Growth", "ICICI Prudential Large and Mid Cap Fund Growth", "ICICI Prudential Liquid Fund Growth", "ICICI Prudential Manufacturing Fund Growth", "ICICI Prudential Medium Term Bond Fund Growth", "ICICI Prudential Midcap Fund Growth", "ICICI Prudential Multi-Asset Fund", "ICICI Prudential Multicap Fund Growth", "ICICI Prudential Savings Fund Growth", "ICICI Prudential Smallcap Fund Growth", "ICICI Prudential Thematic Advantage Fund (FOF) Growth", "ICICI Prudential Ultra Short Term Fund Growth", "ICICI Prudential Value Fund Growth", "ITI Balanced Advantage Fund Growth", "ITI Flexi Cap Fund Growth", "ITI Mid Cap Fund Growth", "ITI Multi Cap Fund Growth", "ITI Pharma and Healthcare Fund Growth", "ITI Small Cap Fund Growth", "Invesco India Arbitrage Fund Growth", "Invesco India Contra Fund Growth", "Invesco India ELSS Tax Saver Fund Growth", "Invesco India Financial Services Fund Growth", "Invesco India Flexi Cap Fund Growth", "Invesco India Mid Cap Fund Growth", "Invesco India Multicap Fund Growth", "Invesco India Small Cap Fund Growth", "Kotak Arbitrage Fund Growth", "Kotak Balanced Advantage Fund Growth", "Kotak Banking & Financial Services Fund Growth", "Kotak Equity Savings Fund Growth", "Kotak Large and Mid Cap Fund Growth", "Kotak Mid Cap Fund Growth", "Kotak Multi Asset Allocation Fund Growth", "Kotak Multicap Fund Growth", "Kotak Small Cap Fund Growth", "Mahindra Manulife Multi Cap Fund Growth", "Mirae Asset ELSS Tax Saver Fund Growth", "Mirae Asset Equity Savings Fund Growth", "Mirae Asset Flexi Cap Fund Growth", "Mirae Asset Focused Fund Growth", "Mirae Asset Great Consumer Fund Growth", "Mirae Asset Health Care Fund Growth", "Mirae Asset Large and Mid Cap Fund Growth", "Mirae Asset Midcap Fund Growth", "Mirae Asset Multicap Fund Growth", "Mirae Asset Small Cap Fund Growth", "Motilal Oswal Balanced Advantage Fund Growth", "Motilal Oswal Business Cycle Fund Growth", "Motilal Oswal ELSS Tax Saver Fund Growth", "Motilal Oswal Flexi Cap Fund Growth", "Motilal Oswal Large and Mid Cap Fund Growth", "Motilal Oswal Liquid Fund Growth", "Motilal Oswal Mid Cap Fund Growth", "Nippon India Balanced Advantage Fund Growth", "Nippon India Banking and Financial Services Fund Growth", "Nippon India ELSS Tax Saver Fund Growth", "Nippon India Focused Fund Growth", "Nippon India Gold Savings Fund Growth", "Nippon India Growth Mid Cap Fund Growth", "Nippon India MNC Fund Growth", "Nippon India Multi Asset Allocation Fund Growth", "Nippon India Multi Cap Fund Growth", "Nippon India Silver ETF Fund of Fund Growth", "Nippon India Small Cap Fund Growth", "Nippon India Value Fund Growth", "PGIM India Flexi Cap Fund Growth", "PGIM India Mid Cap Fund Growth", "PGIM India Small Cap Fund Growth", "Parag Parikh ELSS Tax Saver Fund Growth", "Parag Parikh Flexi Cap Fund Growth", "Parag Parikh Liquid Fund Growth", "Quant Aggressive Hybrid Fund Growth", "Quant BFSI Fund Growth", "Quant Business Cycle Fund Growth", "Quant Consumption Fund Growth", "Quant Dynamic Asset Allocation Fund Growth", "Quant ELSS Tax Saver Fund Growth", "Quant Flexi Cap Fund Growth", "Quant Healthcare Fund Growth", "Quant Liquid Plan Growth", "Quant Manufacturing Fund Growth", "Quant Mid Cap Fund Growth", "Quant Momentum Fund Growth", "Quant Multi Asset Allocation Fund Growth", "Quant Multi Cap Fund Growth", "Quant PSU Fund Growth", "Quant Quantamental Fund Growth", "Quant Small Cap Fund Growth", "Quant Teck Fund Growth", "Quant Value Fund Growth", "SBI Banking and Financial Services Fund Growth", "SBI ELSS Tax Saver Fund Growth", "SBI Energy Opportunities Fund Growth", "SBI Flexi Cap Fund Growth", "SBI Focused Fund Growth", "SBI Infrastructure Fund Growth", "SBI Large & Midcap Fund Growth", "SBI Large Cap Fund Growth", "SBI Mid Cap Fund Growth", "SBI Quant Fund Growth", "SBI Silver ETF Fund of Fund Growth", "SBI Small Cap Fund Growth", "Samco Active Momentum Fund Growth", "Samco Dynamic Asset Allocation Fund Growth", "Samco Flexi Cap Fund Growth", "Samco Multi Asset Allocation Fund Growth", "Sundaram Consumption Fund Growth", "Sundaram Mid Cap Fund Growth", "Sundaram Multi Cap Fund Growth", "Sundaram Multi Factor Fund Growth", "Sundaram Services Fund Growth", "Sundaram Small Cap Fund Growth", "Tata Arbitrage Fund Growth", "Tata Business Cycle Fund Growth", "Tata Flexi Cap Fund Growth", "Tata India Consumer Fund Growth", "Tata Mid Cap Fund Growth", "Tata Multi Asset Allocation Fund Growth", "Tata Nifty SDL Plus AAA PSU Bond Dec 2027 60:40 Index Fund Growth", "Tata Retirement Savings Fund Progresive Plan Growth", "Tata Small Cap Fund Growth", "Tata Value Fund Growth", "Titanium Hybrid Long Growth", "UTI Flexi Cap Fund Growth", "UTI Large and Mid Cap Fund Growth", "UTI Value Fund Growth", "Union Balanced Advantage Fund Growth", "Union Flexi Cap Fund Growth", "Union Large and Mid Cap Fund Growth", "Union Mid Cap Fund Growth", "Union Retirement Fund Growth", "WhiteOak Capital Balanced Advantage Fund Growth", "WhiteOak Capital ELSS Tax Saver Fund Growth", "WhiteOak Capital Equity Savings Fund Growth", "WhiteOak Capital Flexi Cap Fund Growth", "WhiteOak Capital Large and Mid Cap Fund Growth", "WhiteOak Capital Mid Cap Fund Growth", "WhiteOak Capital Multi Asset Allocation Fund Growth", "WhiteOak Capital Multi Cap Fund Growth", "WhiteOak Capital Quality Equity Fund Growth", "WhiteOak Capital Special Opportunities Fund Growth", "iSIF Equity Ex-Top 100 Long-Short Fund - Growth", "qsif Equity Ex Growth", "qsif Equity Long Growth"];
 
@@ -506,32 +498,22 @@ function calculateLive() {
     const actLS = parseFloat(document.getElementById('f_actual_ls').value) || 0;
     const type = document.getElementById('f_type').value;
 
-    // 1. Calculate Future Value (Goal)
     const goalFV = pv * Math.pow((1 + inf), years);
-    
-    // 2. Monthly Rate (Geometric) & Total Months
     const r = growth > 0 ? Math.pow((1 + growth), 1/12) - 1 : 0;
     const n = years * 12;
-    
-    // 3. Annuity Factor (Beginning of Period)
     const af = (n > 0 && r > 0) ? ((Math.pow(1 + r, n) - 1) / r) * (1 + r) : n;
 
-    // 4. Requirement Calculations
     const reqSIP = (n > 0) ? goalFV / af : 0;
     const reqLS = goalFV / Math.pow((1 + growth), years);
 
-    // Update Form Displays
     document.getElementById('c_fv').innerText = '₹' + Math.round(goalFV).toLocaleString('en-IN');
     document.getElementById('display_req_sip').innerText = '₹' + Math.round(reqSIP).toLocaleString('en-IN');
     document.getElementById('display_req_ls').innerText = '₹' + Math.round(reqLS).toLocaleString('en-IN');
 
-    // 5. Projected Maturity of what the client is ACTUALLY doing
     const totalActualFV = ((type === 'SIP' || type === 'SIP_LS') ? (actSIP * af) : 0) + 
                          ((type === 'LS' || type === 'SIP_LS') ? (actLS * Math.pow((1 + growth), years)) : 0);
     
     document.getElementById('c_total_inv').innerText = '₹' + Math.round(totalActualFV).toLocaleString('en-IN');
-    
-    // Gap Analysis (Additional Requirement)
     const fvGap = Math.max(0, goalFV - totalActualFV);
     document.getElementById('display_inter_sip').innerText = '₹' + Math.round(n > 0 ? fvGap / af : 0).toLocaleString('en-IN');
     document.getElementById('display_inter_ls').innerText = '₹' + Math.round(fvGap / Math.pow((1 + growth), years)).toLocaleString('en-IN');
@@ -548,251 +530,79 @@ function calculateLive() {
     }
 }
 
-        // --- REORGANIZED PDF LOGIC WITH CENTERED LOGO ---
+        // --- PREVIEW LOGIC WITH SPLIT COMPOSITION ---
+        window.viewClientProfile = (id) => {
+            const c = allClients.find(x => x.firebaseId === id);
+            if (!c) return;
+
+            document.getElementById('p_name').innerText = c.name;
+            document.getElementById('p_goal_type').innerText = c.goal;
+            document.getElementById('p_pv_val').innerText = '₹' + Number(c.pv).toLocaleString('en-IN');
+            document.getElementById('p_fv_val').innerText = '₹' + Math.round(c.fv).toLocaleString('en-IN');
+            document.getElementById('p_target_val').innerText = c.targetDateDisplay;
+            document.getElementById('p_years_val').innerText = c.years + " Years";
+
+            // CALCULATE SPLIT MATURITY
+            const growth = (parseFloat(c.growth) || 0) / 100;
+            const r = growth > 0 ? Math.pow((1 + growth), 1/12) - 1 : 0;
+            const n = (parseFloat(c.years) || 0) * 12;
+            const af = (n > 0 && r > 0) ? ((Math.pow(1 + r, n) - 1) / r) * (1 + r) : n;
+
+            const sipMaturity = (c.type === 'SIP' || c.type === 'SIP_LS') ? (Number(c.actualSIP || 0) * af) : 0;
+            const lsMaturity = (c.type === 'LS' || c.type === 'SIP_LS') ? (Number(c.actualLS || 0) * Math.pow((1 + growth), c.years)) : 0;
+            const totalAchieved = sipMaturity + lsMaturity;
+            const goalFV = Math.round(c.fv || 0);
+            const gap = Math.max(0, goalFV - totalAchieved);
+            const completionPct = Math.min(100, Math.round((totalAchieved / goalFV) * 100));
+
+            document.getElementById('p_actual_amt').innerText = '₹' + Math.round(totalAchieved).toLocaleString('en-IN');
+            document.getElementById('p_gap_amt').innerText = '₹' + Math.round(gap).toLocaleString('en-IN');
+            document.getElementById('p_completion_pct').innerText = completionPct + "% Coverage";
+            document.getElementById('p_strategy_pill').innerText = `${c.type.replace('_', ' + ')} Strategy`;
+
+            const ctx = document.getElementById('goalChart').getContext('2d');
+            if (goalChartInstance) goalChartInstance.destroy();
+
+            goalChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['SIP Growth', 'LS Growth', 'Funding Gap'],
+                    datasets: [{
+                        data: [Math.round(sipMaturity), Math.round(lsMaturity), Math.round(gap)],
+                        backgroundColor: ['#2563eb', '#7c3aed', '#f1f5f9'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: { cutout: '80%', plugins: { legend: { display: false } } }
+            });
+
+            document.getElementById('previewModal').style.display = 'flex';
+        };
+
         window.downloadReport = async (id) => {
             const docSnap = await getDoc(doc(db, "clients", id));
             if (!docSnap.exists()) return;
             const c = docSnap.data();
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF();
-
             const logoImg = document.getElementById('logoImg');
             if (logoImg && logoImg.complete) {
                 const imgProps = pdf.getImageProperties(logoImg);
                 const pageWidth = pdf.internal.pageSize.getWidth();
-                const pdfWidth = 100; 
-                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-                const xPos = (pageWidth - pdfWidth) / 2;
-                pdf.addImage(logoImg, 'PNG', xPos, 15, pdfWidth, pdfHeight); 
+                pdf.addImage(logoImg, 'PNG', (pageWidth - 100) / 2, 15, 100, (imgProps.height * 100) / imgProps.width); 
             }
-            
-            pdf.setDrawColor(226, 232, 240);
-            pdf.line(20, 45, 190, 45);
-
-            pdf.setFont("helvetica", "bold");
-            pdf.setFontSize(15);
-            pdf.setTextColor(30, 41, 59);
-            pdf.text("Client Financial Roadmap", 20, 58);
-            
-            pdf.setFontSize(9);
-            pdf.setFont("helvetica", "normal");
-            pdf.text(`Financial Plan for ${c.name}`, 20, 65);
-            pdf.text(`Generated on: ${new Date().toLocaleDateString('en-GB')}`, 145, 58);
-
-            const staffList = Array.isArray(c.assigned) ? c.assigned.join(', ') : (c.assigned || "Unassigned");
-            const wrappedStaff = pdf.splitTextToSize(`Assigned To: ${staffList}`, 45); 
-            pdf.text(wrappedStaff, 145, 65);
-
+            pdf.setDrawColor(226, 232, 240); pdf.line(20, 45, 190, 45);
+            pdf.setFont("helvetica", "bold"); pdf.setFontSize(15); pdf.setTextColor(30, 41, 59); pdf.text("Client Financial Roadmap", 20, 58);
+            pdf.setFontSize(9); pdf.setFont("helvetica", "normal"); pdf.text(`Financial Plan for ${c.name}`, 20, 65);
             const metricData = [
-                ["Primary Goal", c.goal], 
-                ["SIP Fund Allocated", c.sipFund || "Not Specified"], 
-                ["LS Fund Allocated", c.lsFund || "Not Specified"],
-                ["Risk Profile", c.risk],
-                ["Target Year", c.targetDateDisplay],
-                ["Present Cost", `Rs. ${Number(c.pv).toLocaleString('en-IN')}`],
-                ["Future Cost (FV)", `Rs. ${Math.round(c.fv).toLocaleString('en-IN')}`],
-                ["Investment Type", c.type],
-                ["Current Status", c.status ? c.status.toUpperCase() : "ACTIVE"]
+                ["Goal", c.goal], ["Risk", c.risk], ["PV", `Rs. ${Number(c.pv).toLocaleString()}`],
+                ["Target FV", `Rs. ${Math.round(c.fv).toLocaleString()}`], ["Target Date", c.targetDateDisplay], ["Status", c.status]
             ];
-
-            pdf.autoTable({
-                startY: 75,
-                head: [['Metric', 'Value']],
-                body: metricData,
-                theme: 'striped',
-                headStyles: { fillColor: [0, 51, 102], textColor: [255, 255, 255], fontSize: 10 },
-                styles: { fontSize: 9, cellPadding: 3 },
-                margin: { left: 20, right: 20 }
-            });
-
-            const currentY = pdf.lastAutoTable.finalY + 15;
-            pdf.setFont("helvetica", "bold");
-            pdf.setFontSize(11);
-            pdf.text("Investment Requirements", 20, currentY);
-
-            const requirementData = [
-                ["Required SIP (Standalone)", `Rs. ${Math.round(c.reqSIP || 0).toLocaleString('en-IN')}`], 
-                ["Required Lump Sum (Standalone)", `Rs. ${Math.round(c.reqLS || 0).toLocaleString('en-IN')}`], 
-                ["Actual SIP Commitment", `Rs. ${Number(c.actualSIP || 0).toLocaleString('en-IN')}`], 
-                ["Actual Lump Sum Commitment", `Rs. ${Number(c.actualLS || 0).toLocaleString('en-IN')}`] 
-            ];
-
-            pdf.autoTable({
-                startY: currentY + 5,
-                body: requirementData,
-                theme: 'plain',
-                styles: { fontStyle: 'bold', fontSize: 9 },
-                columnStyles: { 0: { cellWidth: 100 }, 1: { halign: 'right' } },
-                margin: { left: 20, right: 20 }
-            });
-
-            pdf.setFontSize(8);
-            pdf.setFont("helvetica", "italic");
-            pdf.setTextColor(150);
-            pdf.text("Disclaimer: This report is for planning purposes only.", 20, 285);
-
+            pdf.autoTable({ startY: 75, head: [['Metric', 'Value']], body: metricData, theme: 'striped' });
             pdf.save(`Financial_Plan_${c.name}.pdf`);
         };
 
-       document.getElementById('clientForm').onsubmit = async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('editId').value;
-    
-    // Get all inputs
-    const pv = parseFloat(document.getElementById('f_pv').value);
-    const years = parseFloat(document.getElementById('f_years').value);
-    const inf = parseFloat(document.getElementById('f_inf').value);
-    const growth = parseFloat(document.getElementById('f_growth').value);
-    const type = document.getElementById('f_type').value;
-    const actSIP = parseFloat(document.getElementById('f_actual_sip').value) || 0;
-    const actLS = parseFloat(document.getElementById('f_actual_ls').value) || 0;
-
-    // Use THE EXACT same formulas as calculateLive
-    const goalFV = pv * Math.pow((1 + inf/100), years);
-    const r = growth > 0 ? Math.pow((1 + growth/100), 1/12) - 1 : 0;
-    const n = years * 12;
-    const af = (n > 0 && r > 0) ? ((Math.pow(1 + r, n) - 1) / r) * (1 + r) : n;
-
-    const reqSIP = (n > 0) ? goalFV / af : 0;
-    const reqLS = goalFV / Math.pow((1 + growth/100), years);
-
-    const totalActualFV = ((type === 'SIP' || type === 'SIP_LS') ? (actSIP * af) : 0) + 
-                         ((type === 'LS' || type === 'SIP_LS') ? (actLS * Math.pow((1 + growth/100), years)) : 0);
-
-    let targetDate = new Date(document.getElementById('f_date').value); 
-    targetDate.setFullYear(targetDate.getFullYear() + Math.floor(years));
-
-    const payload = {
-        date: document.getElementById('f_date').value, 
-        name: document.getElementById('f_name').value,
-        goal: document.getElementById('f_goal').value === 'Custom' ? document.getElementById('f_custom_goal').value : document.getElementById('f_goal').value,
-        assigned: Array.from(document.getElementById('f_assigned').selectedOptions).map(o => o.value), 
-        risk: document.getElementById('f_risk').value, 
-        notes: document.getElementById('f_notes').value,
-        pv, years, inf, growth, type, 
-        actualSIP: actSIP, 
-        actualLS: actLS, 
-        sipFund: document.getElementById('f_sip_fund').value, 
-        lsFund: document.getElementById('f_ls_fund').value, 
-        reviewN: parseFloat(document.getElementById('f_review_n').value) || 2,
-        reqSIP, 
-        reqLS, 
-        totalActualFV, 
-        fv: goalFV, 
-        diff: totalActualFV - goalFV, 
-        status: document.getElementById('f_status').value,
-        targetDateRaw: targetDate.toISOString(), 
-        targetDateDisplay: targetDate.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
-    };
-
-    if (id) {
-        await updateDoc(doc(db, "clients", id), payload);
-    } else {
-        await addDoc(clientsCol, payload);
-    }
-    closeModal('formModal');
-};
-
-function renderTable(data) {
-    const tbody = document.getElementById('tableBody');
-    const today = new Date();
-    let pendingReviews = 0;
-
-    if (data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="18" style="text-align:center; padding:40px;">No records.</td></tr>`;
-        return;
-    }
-
-    tbody.innerHTML = data.sort((a,b) => new Date(a.targetDateRaw) - new Date(b.targetDateRaw)).map((c, index) => {
-        // --- RE-CALCULATE TO ENSURE PARITY WITH FORM ---
-        const pv = parseFloat(c.pv) || 0;
-        const years = parseFloat(c.years) || 0;
-        const inf = (parseFloat(c.inf) || 0) / 100;
-        const growth = (parseFloat(c.growth) || 0) / 100;
-        
-        // 1. Goal Future Value
-        const goalFV = pv * Math.pow((1 + inf), years);
-        
-        // 2. Monthly Rate & Months
-        const r = growth > 0 ? Math.pow((1 + growth), 1/12) - 1 : 0;
-        const n = years * 12;
-        
-        // 3. Annuity Factor
-        const af = (n > 0 && r > 0) ? ((Math.pow(1 + r, n) - 1) / r) * (1 + r) : n;
-
-        // 4. Exact Requirements (Matches Form)
-        const reqSip = Math.round(n > 0 ? goalFV / af : 0);
-        const reqLs = Math.round(goalFV / Math.pow((1 + growth), years));
-        // -----------------------------------------------
-
-        const targetDate = new Date(c.targetDateRaw);
-        const reviewN = parseFloat(c.reviewN) || 2;
-        const reviewStart = new Date(targetDate); 
-        reviewStart.setFullYear(reviewStart.getFullYear() - reviewN);
-        const isCurrentlyReviewing = today >= reviewStart && today <= targetDate && c.status !== "Completed";
-        
-        if (isCurrentlyReviewing) pendingReviews++;
-
-        // Tooltip and Display logic
-        let fundTooltip = c.type === 'SIP' ? `SIP Fund: ${c.sipFund || 'None'}` : 
-                          c.type === 'LS' ? `LS Fund: ${c.lsFund || 'None'}` : 
-                          `SIP Fund: ${c.sipFund || 'None'}\nLS Fund: ${c.lsFund || 'None'}`;
-
-        let reqDisplay = "";
-        if (c.type === 'SIP_LS') {
-            reqDisplay = `
-                <div style="display: flex; flex-direction: column; line-height: 1.2;">
-                    <span>₹${reqSip.toLocaleString('en-IN')}<small style="color: var(--text-muted); font-size: 8px;">/mo</small></span>
-                    <span style="border-top: 1px solid #e2e8f0; margin-top: 2px; padding-top: 2px;">₹${reqLs.toLocaleString('en-IN')}</span>
-                </div>`;
-        } else if (c.type === 'SIP') {
-            reqDisplay = `₹${reqSip.toLocaleString('en-IN')}<small style="color: var(--text-muted); font-size: 8px;">/mo</small>`;
-        } else {
-            reqDisplay = `₹${reqLs.toLocaleString('en-IN')}`;
-        }
-
-        const actSip = Number(c.actualSIP || 0);
-        const actLs = Number(c.actualLS || 0);
-        let actualDisplay = c.type === 'SIP_LS' ? `
-                <div style="display: flex; flex-direction: column; line-height: 1.2;">
-                    <span>₹${actSip.toLocaleString('en-IN')}<small style="color: var(--text-muted); font-size: 8px;">/mo</small></span>
-                    <span style="border-top: 1px solid #e2e8f0; margin-top: 2px; padding-top: 2px;">₹${actLs.toLocaleString('en-IN')}</span>
-                </div>` : 
-                c.type === 'SIP' ? `₹${actSip.toLocaleString('en-IN')}<small style="color: var(--text-muted); font-size: 8px;">/mo</small>` : 
-                `₹${actLs.toLocaleString('en-IN')}`;
-
-        const diff = (c.totalActualFV || 0) - (c.fv || 0);
-        const assignedList = Array.isArray(c.assigned) ? c.assigned : [c.assigned || "Unassigned"];
-        
-        return `
-        <tr ${isCurrentlyReviewing ? 'style="background-color: #fffbeb;"' : ''}>
-            <td>${index + 1}</td><td>${c.date}</td><td>${c.name}</td>
-            <td><span class="hover-cell" data-tooltip="${c.notes || 'No notes.'}">${c.goal}</span></td>
-            <td><span class="risk-pill ${c.risk}">${c.risk}</span></td>
-            <td><div class="assigned-stack">${assignedList.map(name => `<span>${name}</span>`).join('')}</div></td>
-            <td><span class="hover-cell" data-tooltip="${fundTooltip}">${c.type.replace('_', '+')}</span></td>
-            <td>₹${Number(c.pv).toLocaleString()}</td><td>${c.years}Y</td>
-            <td>${c.inf}%</td><td>${c.growth}%</td><td><strong>₹${Math.round(c.fv).toLocaleString()}</strong></td>
-            <td>${c.targetDateDisplay}</td>
-            <td><span class="hover-cell" data-tooltip="Standalone Requirements">${reqDisplay}</span></td>
-            <td><span class="hover-cell" data-tooltip="Projected Maturity: ₹${Math.round(c.totalActualFV || 0).toLocaleString('en-IN')}">${actualDisplay}</span></td>
-            <td class="${diff >= 0 ? 'surplus' : 'deficit'}">₹${Math.abs(Math.round(diff)).toLocaleString()}</td>
-            <td><span class="status-pill ${isCurrentlyReviewing ? 'Under-Review' : c.status}">${isCurrentlyReviewing ? 'Under Review' : c.status}</span></td>
-            <td>
-                <div class="actions-group">
-                    <i data-lucide="file-text" class="icon-btn" onclick="downloadReport('${c.firebaseId}')" style="color:#0891b2; cursor:pointer;"></i>
-                    <i data-lucide="edit-3" class="icon-btn" onclick="prepareEdit('${c.firebaseId}')" style="color:#64748b; cursor:pointer; margin: 0 8px;"></i>
-                    <i data-lucide="trash-2" class="icon-btn" onclick="deletePlan('${c.firebaseId}')" style="color:#dc2626; cursor:pointer;"></i>
-                </div>
-            </td>
-        </tr>`;
-    }).join('');
-    
-    lucide.createIcons();
-    document.getElementById('statLine').innerHTML = `${data.length} Plans Visible`;
-    const alertContainer = document.getElementById('reviewAlertContainer');
-    alertContainer.innerHTML = pendingReviews > 0 ? `<span class="pending-alert">• ${pendingReviews} Review Required</span>` : "";
-}
         window.applyFilters = () => {
             const search = document.getElementById('searchInput').value.toLowerCase();
             const staff = document.getElementById('filterAssigned').value;
@@ -811,37 +621,123 @@ function renderTable(data) {
             renderTable(filtered);
         };
 
+function renderTable(data) {
+    const tbody = document.getElementById('tableBody');
+    const today = new Date();
+    let pendingReviews = 0;
+    if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="18" style="text-align:center; padding:40px;">No records.</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = data.sort((a,b) => new Date(a.targetDateRaw) - new Date(b.targetDateRaw)).map((c, index) => {
+        const pv = parseFloat(c.pv) || 0; const years = parseFloat(c.years) || 0;
+        const inf = (parseFloat(c.inf) || 0) / 100; const growth = (parseFloat(c.growth) || 0) / 100;
+        const goalFV = pv * Math.pow((1 + inf), years);
+        const r = growth > 0 ? Math.pow((1 + growth), 1/12) - 1 : 0;
+        const n = years * 12;
+        const af = (n > 0 && r > 0) ? ((Math.pow(1 + r, n) - 1) / r) * (1 + r) : n;
+        const reqSip = Math.round(n > 0 ? goalFV / af : 0);
+        const reqLs = Math.round(goalFV / Math.pow((1 + growth), years));
+
+        const targetDate = new Date(c.targetDateRaw);
+        const reviewStart = new Date(targetDate); reviewStart.setFullYear(reviewStart.getFullYear() - (parseFloat(c.reviewN) || 2));
+        const isCurrentlyReviewing = today >= reviewStart && today <= targetDate && c.status !== "Completed";
+        if (isCurrentlyReviewing) pendingReviews++;
+
+        let fundTooltip = c.type === 'SIP' ? `SIP Fund: ${c.sipFund || 'None'}` : 
+                          c.type === 'LS' ? `LS Fund: ${c.lsFund || 'None'}` : 
+                          `SIP Fund: ${c.sipFund || 'None'}\nLS Fund: ${c.lsFund || 'None'}`;
+
+        let reqDisplay = (c.type === 'SIP_LS') ? 
+            `<div style="display:flex; flex-direction:column; line-height:1.2;"><span>₹${reqSip.toLocaleString()}<small>/mo</small></span><span style="border-top:1px solid #e2e8f0;">₹${reqLs.toLocaleString()}</span></div>` :
+            (c.type === 'SIP' ? `₹${reqSip.toLocaleString()}<small>/mo</small>` : `₹${reqLs.toLocaleString()}`);
+
+        const actSip = Number(c.actualSIP || 0); const actLs = Number(c.actualLS || 0);
+        let actualDisplay = (c.type === 'SIP_LS') ?
+            `<div style="display:flex; flex-direction:column; line-height:1.2;"><span>₹${actSip.toLocaleString()}<small>/mo</small></span><span style="border-top:1px solid #e2e8f0;">₹${actLs.toLocaleString()}</span></div>` :
+            (c.type === 'SIP' ? `₹${actSip.toLocaleString()}<small>/mo</small>` : `₹${actLs.toLocaleString()}`);
+
+        const diff = (c.totalActualFV || 0) - (c.fv || 0);
+        return `
+        <tr ${isCurrentlyReviewing ? 'style="background-color: #fffbeb;"' : ''}>
+            <td>${index + 1}</td><td>${c.date}</td>
+            <td onclick="viewClientProfile('${c.firebaseId}')" style="cursor:pointer; color:#2563eb; font-weight:700; text-decoration:underline;">${c.name}</td>
+            <td><span class="hover-cell" data-tooltip="${c.notes || 'No notes.'}">${c.goal}</span></td>
+            <td><span class="risk-pill ${c.risk}">${c.risk}</span></td>
+            <td><div class="assigned-stack">${(c.assigned || []).map(name => `<span>${name}</span>`).join('')}</div></td>
+            <td><span class="hover-cell" data-tooltip="${fundTooltip}">${c.type.replace('_', '+')}</span></td>
+            <td>₹${Number(c.pv).toLocaleString()}</td><td>${c.years}Y</td><td>${c.inf}%</td><td>${c.growth}%</td>
+            <td><strong>₹${Math.round(c.fv).toLocaleString()}</strong></td><td>${c.targetDateDisplay}</td>
+            <td><span class="hover-cell" data-tooltip="Requirements">${reqDisplay}</span></td>
+            <td><span class="hover-cell" data-tooltip="Projected Maturity: ₹${Math.round(c.totalActualFV || 0).toLocaleString()}">${actualDisplay}</span></td>
+            <td class="${diff >= 0 ? 'surplus' : 'deficit'}">₹${Math.abs(Math.round(diff)).toLocaleString()}</td>
+            <td><span class="status-pill ${isCurrentlyReviewing ? 'Under-Review' : c.status}">${isCurrentlyReviewing ? 'Under Review' : c.status}</span></td>
+            <td><i data-lucide="edit-3" onclick="prepareEdit('${c.firebaseId}')" style="cursor:pointer;"></i> <i data-lucide="trash-2" onclick="deletePlan('${c.firebaseId}')" style="color:red; cursor:pointer;"></i></td>
+        </tr>`;
+    }).join('');
+    lucide.createIcons();
+    document.getElementById('statLine').innerHTML = `${data.length} Plans Visible`;
+    document.getElementById('reviewAlertContainer').innerHTML = pendingReviews > 0 ? `<span class="pending-alert">• ${pendingReviews} Review Required</span>` : "";
+}
+
+        document.getElementById('clientForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editId').value;
+            const pv = parseFloat(document.getElementById('f_pv').value);
+            const years = parseFloat(document.getElementById('f_years').value);
+            const inf = parseFloat(document.getElementById('f_inf').value);
+            const growth = parseFloat(document.getElementById('f_growth').value);
+            const type = document.getElementById('f_type').value;
+            const actSIP = parseFloat(document.getElementById('f_actual_sip').value) || 0;
+            const actLS = parseFloat(document.getElementById('f_actual_ls').value) || 0;
+
+            const goalFV = pv * Math.pow((1 + inf/100), years);
+            const r = growth > 0 ? Math.pow((1 + growth/100), 1/12) - 1 : 0;
+            const n = years * 12;
+            const af = (n > 0 && r > 0) ? ((Math.pow(1 + r, n) - 1) / r) * (1 + r) : n;
+
+            const reqSIP = (n > 0) ? goalFV / af : 0;
+            const reqLS = goalFV / Math.pow((1 + growth/100), years);
+
+            const totalActualFV = ((type === 'SIP' || type === 'SIP_LS') ? (actSIP * af) : 0) + 
+                                 ((type === 'LS' || type === 'SIP_LS') ? (actLS * Math.pow((1 + growth/100), years)) : 0);
+
+            let targetDate = new Date(document.getElementById('f_date').value); 
+            targetDate.setFullYear(targetDate.getFullYear() + Math.floor(years));
+
+            const payload = {
+                date: document.getElementById('f_date').value, name: document.getElementById('f_name').value,
+                goal: document.getElementById('f_goal').value === 'Custom' ? document.getElementById('f_custom_goal').value : document.getElementById('f_goal').value,
+                assigned: Array.from(document.getElementById('f_assigned').selectedOptions).map(o => o.value), 
+                risk: document.getElementById('f_risk').value, notes: document.getElementById('f_notes').value,
+                pv, years, inf, growth, type, actualSIP: actSIP, actualLS: actLS, 
+                sipFund: document.getElementById('f_sip_fund').value, lsFund: document.getElementById('f_ls_fund').value, 
+                reqSIP, reqLS, totalActualFV, fv: goalFV, status: document.getElementById('f_status').value,
+                targetDateRaw: targetDate.toISOString(), targetDateDisplay: targetDate.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
+            };
+
+            if (id) await updateDoc(doc(db, "clients", id), payload);
+            else await addDoc(clientsCol, payload);
+            closeModal('formModal');
+        };
+
         window.prepareEdit = (id) => {
-            const c = allClients.find(x => x.firebaseId === id); if (!c) return;
+            const c = allClients.find(x => x.firebaseId === id);
             document.getElementById('editId').value = id;
             document.getElementById('f_name').value = c.name; document.getElementById('f_date').value = c.date;
             document.getElementById('f_pv').value = c.pv; document.getElementById('f_years').value = c.years;
             document.getElementById('f_inf').value = c.inf; document.getElementById('f_growth').value = c.growth;
-            document.getElementById('f_review_n').value = c.reviewN || 2;
             document.getElementById('f_type').value = c.type; document.getElementById('f_actual_sip').value = c.actualSIP || 0;
-            document.getElementById('f_actual_ls').value = c.actualLS || 0; 
-            document.getElementById('sip_fund_search').value    = c.sipFund || "None";
-            document.getElementById('f_sip_fund').value = c.sipFund || "None";
-            document.getElementById('ls_fund_search').value = c.lsFund || "None";
-            document.getElementById('f_ls_fund').value = c.lsFund || "None";
-            document.getElementById('f_status').value = c.status;
-            document.getElementById('f_risk').value = c.risk || "Low"; document.getElementById('f_notes').value = c.notes || "";
-            Array.from(document.getElementById('f_assigned').options).forEach(o => o.selected = (c.assigned || []).includes(o.value));
+            document.getElementById('f_actual_ls').value = c.actualLS || 0; document.getElementById('f_status').value = c.status;
             toggleInvestmentInputs(c.type); document.getElementById('formModal').style.display = 'flex'; calculateLive();
         };
 
-        window.exportToExcel = () => {
-            const ws = XLSX.utils.json_to_sheet(allClients);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Plans");
-            XLSX.writeFile(wb, "FideloWealth_Plans.xlsx");
-        };
-
-        ['f_pv', 'f_years', 'f_inf', 'f_growth', 'f_actual_sip', 'f_actual_ls', 'f_type', 'f_date', 'f_review_n'].forEach(id => document.getElementById(id).addEventListener('input', calculateLive));
-        window.openModal = () => { document.getElementById('clientForm').reset(); document.getElementById('editId').value = ""; toggleInvestmentInputs('SIP'); document.getElementById('formModal').style.display = 'flex'; };
+        ['f_pv', 'f_years', 'f_inf', 'f_growth', 'f_actual_sip', 'f_actual_ls', 'f_type', 'f_date'].forEach(id => document.getElementById(id).addEventListener('input', calculateLive));
+        window.openModal = () => { document.getElementById('clientForm').reset(); document.getElementById('editId').value = ""; document.getElementById('formModal').style.display = 'flex'; };
         window.closeModal = (id) => document.getElementById(id).style.display = 'none';
         window.deletePlan = async (id) => { if(confirm("Delete record?")) await deleteDoc(doc(db, "clients", id)); };
         window.toggleCustomGoal = (v) => document.getElementById('f_custom_goal').style.display = v === 'Custom' ? 'block' : 'none';
+        window.exportToExcel = () => { const ws = XLSX.utils.json_to_sheet(allClients); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Plans"); XLSX.writeFile(wb, "FideloWealth_Plans.xlsx"); };
     </script>
     </body>
     </html>
